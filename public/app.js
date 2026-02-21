@@ -491,7 +491,7 @@ function initNavbar() {
     });
 
     // Active nav link on scroll
-    const sections = ['trending', 'new-releases', 'series', 'genres'];
+    const sections = ['trending', 'new-releases', 'series', 'popular-tv', 'genres'];
     const navLinks = document.querySelectorAll('.nav-link');
 
     const observerCb = (entries) => {
