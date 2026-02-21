@@ -1,4 +1,4 @@
-# CineVault / HorizonX
+# HorizonX
 
 **HorizonX** is a modern movie streaming platform prototype built using **React, TypeScript, Vite, and Express.js**.
 It provides a luxury-style streaming interface powered by **TMDB movie data** and a secure backend API proxy.
@@ -48,7 +48,7 @@ This project demonstrates how a real streaming platform architecture works, incl
 ## Project Structure
 
 ```
-CineVault/
+HorizonX/
 │
 ├── public/            # Static frontend files
 │
