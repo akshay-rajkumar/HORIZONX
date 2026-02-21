@@ -194,6 +194,19 @@ app.get('/api/tv/:id', async (req, res) => {
     }
 });
 
+/** GET /api/tv/:id/season/:season_number — TV season details for episode count */
+app.get('/api/tv/:id/season/:season_number', async (req, res) => {
+    if (!validId(req.params.id)) return res.status(400).json({ error: 'Invalid tv id' });
+    if (!validId(req.params.season_number)) return res.status(400).json({ error: 'Invalid season number' });
+    try {
+        const raw = await tmdb(`/tv/${req.params.id}/season/${req.params.season_number}`);
+        // Return exactly what the player expects: { episodes: count }
+        res.json({ episodes: raw.episodes ? raw.episodes.length : 0 });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 /** GET /api/genres — genre list with counts */
 app.get('/api/genres', async (req, res) => {
     try {
