@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="HorizonX — Watch premium movies and series in stunning quality." />
+  <title>HorizonX — Premium Cinema Streaming</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <!-- ─────────── NAVBAR ─────────── -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="#" class="logo" aria-label="HorizonX Home">
+        <span class="logo-icon" aria-hidden="true">◈</span>
+        <span class="logo-text">HorizonX</span>
+      </a>
+
+      <ul class="nav-links" role="menubar">
+        <li role="none"><a href="#" class="nav-link" id="nav-home" role="menuitem">Home</a></li>
+        <li role="none"><a href="#trending" class="nav-link" id="nav-trending" role="menuitem">Trending</a></li>
+        <li role="none"><a href="#genres" class="nav-link" id="nav-genres" role="menuitem">Genres</a></li>
+        <li role="none"><a href="#new-releases" class="nav-link" id="nav-new-releases" role="menuitem">New Releases</a>
+        </li>
+        <li role="none"><a href="#" class="nav-link" role="menuitem">My List</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="icon-btn" id="search-btn" aria-label="Search" title="Search (Ctrl+K)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+        <button class="icon-btn" aria-label="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+        </button>
+        <button class="avatar-btn" aria-label="Account">A</button>
+        <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search overlay -->
+    <div class="search-overlay" id="search-overlay" role="search" aria-hidden="true">
+      <div class="search-inner">
+        <input class="search-input" id="search-input" type="search" placeholder="Search titles, genres…"
+          autocomplete="off" aria-label="Search" />
+        <button class="search-close" id="search-close" aria-label="Close search">✕</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true" role="dialog" aria-label="Mobile navigation">
+    <a href="#" class="mobile-link">Home</a>
+    <a href="#trending" class="mobile-link">Trending</a>
+    <a href="#genres" class="mobile-link">Genres</a>
+    <a href="#new-releases" class="mobile-link">New Releases</a>
+    <a href="#" class="mobile-link">My List</a>
+  </div>
+
+  <!-- ─────────── HERO SPOTLIGHT ─────────── -->
+  <section class="hero" id="hero" aria-label="Spotlight film">
+    <div class="hero-bg" id="hero-bg">
+      <div class="hero-bg-img placeholder" id="hero-bg-img"></div>
+      <div class="hero-bg-gradient"></div>
+      <div class="hero-bg-gradient-bottom"></div>
+    </div>
+
+    <div class="hero-content" role="region" aria-label="Featured film">
+      <div class="hero-badge" id="hero-badge">
+        <span class="badge-dot" aria-hidden="true"></span>
+        NOW STREAMING
+      </div>
+
+      <h1 class="hero-title" id="hero-title">Loading…</h1>
+
+      <div class="hero-meta" id="hero-meta" aria-label="Movie details">
+        <span class="meta-year" id="hero-year">—</span>
+        <span class="meta-dot" aria-hidden="true">·</span>
+        <span class="meta-duration" id="hero-duration">—</span>
+        <span class="meta-dot" aria-hidden="true">·</span>
+        <span class="meta-rating" id="hero-rating">—</span>
+        <span class="meta-rating-badge">HD</span>
+      </div>
+
+      <p class="hero-desc" id="hero-desc"></p>
+
+      <div class="hero-genres" id="hero-genres" role="list" aria-label="Genres"></div>
+
+      <div class="hero-actions">
+        <button class="btn-primary" id="hero-play" aria-label="Play film">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          Play Now
+        </button>
+        <button class="btn-trailer" id="hero-trailer" aria-label="Watch trailer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
+          </svg>
+          Watch Trailer
+        </button>
+        <button class="btn-icon" id="hero-wishlist" aria-label="Add to My List">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Hero scroll indicators -->
+    <div class="hero-indicators" role="tablist" aria-label="Featured films">
+      <button class="indicator active" data-index="0" role="tab" aria-label="Film 1" aria-selected="true"></button>
+      <button class="indicator" data-index="1" role="tab" aria-label="Film 2" aria-selected="false"></button>
+      <button class="indicator" data-index="2" role="tab" aria-label="Film 3" aria-selected="false"></button>
+    </div>
+
+    <!-- Scroll cue -->
+    <div class="scroll-cue" aria-hidden="true">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ─────────── TRAILER MODAL ─────────── -->
+  <div class="trailer-overlay" id="trailer-overlay" role="dialog" aria-modal="true" aria-label="Trailer"
+    aria-hidden="true">
+    <div class="trailer-box">
+      <button class="trailer-close" id="trailer-close" aria-label="Close trailer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+        Close
+      </button>
+      <iframe id="trailer-iframe" src="" title="Movie Trailer" allow="autoplay; encrypted-media"
+        allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <!-- ─────────── TRENDING ─────────── -->
+  <section class="row-section reveal-element" id="trending" aria-label="Trending Now">
+    <div class="section-header">
+      <div>
+        <div class="section-label">
+          <span class="label-line" aria-hidden="true"></span>
+          <span class="label-text">Hot Right Now</span>
+        </div>
+        <h2 class="section-title">Trending</h2>
+      </div>
+      <button class="see-all-link see-all-btn" aria-label="See all trending"
+        style="background:none;border:none;cursor:pointer;">See All →</button>
+    </div>
+    <div class="cards-wrapper">
+      <button class="scroll-arrow arrow-left" id="trending-left" aria-label="Scroll left">‹</button>
+      <div class="cards-row" id="trending-row" role="list" aria-label="Trending movies"></div>
+      <button class="scroll-arrow arrow-right" id="trending-right" aria-label="Scroll right">›</button>
+    </div>
+  </section>
+
+  <!-- ─────────── SPOTLIGHT BANNER ─────────── -->
+  <div class="spotlight-banner reveal-element" aria-label="CineVault Collection">
+    <div>
+      <div>
+        <span class="spotlight-eyebrow">Exclusive ∙ HorizonX Original</span>
+        <h2 class="spotlight-title">Collector's Edition<br>2024 Masterpieces</h2>
+        <p class="spotlight-sub">Hand-curated films recognised at Cannes, TIFF and the Academy Awards — restored in 4K
+          with director commentary.</p>
+        <a href="#top-rated" class="spotlight-cta">
+          Explore Collection
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </a>
+      </div>
+      <div class="spotlight-decoration" aria-hidden="true">
+        <div class="deco-ring ring-1"></div>
+        <div class="deco-ring ring-2"></div>
+        <div class="deco-ring ring-3"></div>
+        <span class="deco-icon">◈</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── NEW RELEASES ─────────── -->
+  <section class="row-section reveal-element" id="new-releases" aria-label="New Releases">
+    <div class="section-header">
+      <div>
+        <div class="section-label">
+          <span class="label-line" aria-hidden="true"></span>
+          <span class="label-text">Just Arrived</span>
+        </div>
+        <h2 class="section-title">New Releases</h2>
+      </div>
+      <button class="see-all-link see-all-btn" aria-label="See all new releases"
+        style="background:none;border:none;cursor:pointer;">See All →</button>
+    </div>
+    <div class="cards-wrapper">
+      <button class="scroll-arrow arrow-left" id="new-releases-left" aria-label="Scroll left">‹</button>
+      <div class="cards-row" id="new-releases-row" role="list" aria-label="New releases"></div>
+      <button class="scroll-arrow arrow-right" id="new-releases-right" aria-label="Scroll right">›</button>
+    </div>
+  </section>
+
+  <!-- ─────────── GENRES ─────────── -->
+  <section class="genres-section reveal-element" id="genres" aria-label="Browse by Genre">
+    <div class="section-header" style="max-width:1440px;margin:0 auto;padding:0 48px 28px;">
+      <div>
+        <div class="section-label">
+          <span class="label-line" aria-hidden="true"></span>
+          <span class="label-text">Browse</span>
+        </div>
+        <h2 class="section-title">By Genre</h2>
+      </div>
+    </div>
+    <div class="genres-grid" role="list" aria-label="Genres">
+      <a href="#" class="genre-card" role="listitem" aria-label="Action movies" data-genre-id="28"
+        data-genre-name="Action">
+        <span class="genre-icon">⚡</span>
+        <span class="genre-name">Action</span>
+        <span class="genre-count" id="genre-action-count">—</span>
+      </a>
+      <a href="#" class="genre-card" role="listitem" aria-label="Drama movies" data-genre-id="18"
+        data-genre-name="Drama">
+        <span class="genre-icon">🎭</span>
+        <span class="genre-name">Drama</span>
+        <span class="genre-count" id="genre-drama-count">—</span>
+      </a>
+      <a href="#" class="genre-card" role="listitem" aria-label="Thriller movies" data-genre-id="53"
+        data-genre-name="Thriller">
+        <span class="genre-icon">🔪</span>
+        <span class="genre-name">Thriller</span>
+        <span class="genre-count" id="genre-thriller-count">—</span>
+      </a>
+      <a href="#" class="genre-card" role="listitem" aria-label="Sci-Fi movies" data-genre-id="878"
+        data-genre-name="Sci-Fi">
+        <span class="genre-icon">🚀</span>
+        <span class="genre-name">Sci-Fi</span>
+        <span class="genre-count" id="genre-scifi-count">—</span>
+      </a>
+      <a href="#" class="genre-card" role="listitem" aria-label="Romance movies" data-genre-id="10749"
+        data-genre-name="Romance">
+        <span class="genre-icon">💫</span>
+        <span class="genre-name">Romance</span>
+        <span class="genre-count" id="genre-romance-count">—</span>
+      </a>
+      <a href="#" class="genre-card" role="listitem" aria-label="Horror movies" data-genre-id="27"
+        data-genre-name="Horror">
+        <span class="genre-icon">👁</span>
+        <span class="genre-name">Horror</span>
+        <span class="genre-count" id="genre-horror-count">—</span>
+      </a>
+      <a href="#" class="genre-card" role="listitem" aria-label="Comedy movies" data-genre-id="35"
+        data-genre-name="Comedy">
+        <span class="genre-icon">😂</span>
+        <span class="genre-name">Comedy</span>
+        <span class="genre-count" id="genre-comedy-count">—</span>
+      </a>
+      <a href="#" class="genre-card" role="listitem" aria-label="Documentary movies" data-genre-id="99"
+        data-genre-name="Documentary">
+        <span class="genre-icon">🎬</span>
+        <span class="genre-name">Documentary</span>
+        <span class="genre-count" id="genre-documentary-count">—</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ─────────── GENRE RESULTS ─────────── -->
+  <section class="row-section reveal-element" id="genre-results" aria-live="polite" aria-label="Genre results"
+    style="display:none;">
+    <div class="section-header">
+      <div>
+        <div class="section-label">
+          <span class="label-line" aria-hidden="true"></span>
+          <span class="label-text" id="genre-results-label">Filtered</span>
+        </div>
+        <h2 class="section-title" id="genre-results-title">Genre</h2>
+      </div>
+      <div style="display:flex;gap:16px;align-items:center;">
+        <button class="see-all-link see-all-btn" id="genre-results-see-all" aria-label="See all genre movies"
+          style="background:none;border:none;cursor:pointer;">See All →</button>
+        <button class="see-all-link" id="genre-results-close" aria-label="Clear genre filter"
+          style="background:none;border:none;cursor:pointer;color:var(--text-muted);">✕ Clear</button>
+      </div>
+    </div>
+    <div class="cards-wrapper">
+      <button class="scroll-arrow arrow-left" id="genre-results-left" aria-label="Scroll left">‹</button>
+      <div class="cards-row" id="genre-results-row" role="list" aria-label="Genre filtered movies"></div>
+      <button class="scroll-arrow arrow-right" id="genre-results-right" aria-label="Scroll right">›</button>
+    </div>
+
+    <!-- ─────────── TOP RATED ─────────── -->
+    <section class="row-section reveal-element" id="top-rated" aria-label="Top Rated">
+      <div class="section-header">
+        <div>
+          <div class="section-label">
+            <span class="label-line" aria-hidden="true"></span>
+            <span class="label-text">Critically Acclaimed</span>
+          </div>
+          <h2 class="section-title">Top Rated</h2>
+        </div>
+        <button class="see-all-link see-all-btn" aria-label="See all top rated"
+          style="background:none;border:none;cursor:pointer;">See All →</button>
+      </div>
+      <div class="cards-wrapper">
+        <button class="scroll-arrow arrow-left" id="top-rated-left" aria-label="Scroll left">‹</button>
+        <div class="cards-row" id="top-rated-row" role="list" aria-label="Top rated movies"></div>
+        <button class="scroll-arrow arrow-right" id="top-rated-right" aria-label="Scroll right">›</button>
+      </div>
+    </section>
+
+    <!-- ─────────── NEWSLETTER ─────────── -->
+    <section class="newsletter-section reveal-element" aria-label="Newsletter">
+      <div class="newsletter-inner">
+        <div>
+          <p class="newsletter-eyebrow">Stay in the Loop</p>
+          <h2 class="newsletter-title">Never Miss<br>a Premiere</h2>
+          <p class="newsletter-sub">Get personalised recommendations, early access announcements and curated watchlists
+            straight to your inbox.</p>
+        </div>
+        <form class="newsletter-form" id="newsletter-form" aria-label="Newsletter signup">
+          <div class="form-row">
+            <input class="email-input" id="email-input" type="email" placeholder="your@email.com" autocomplete="email"
+              aria-label="Email address" required />
+            <button class="btn-primary" id="newsletter-submit" type="submit" aria-label="Subscribe">Subscribe</button>
+          </div>
+          <p class="form-note">No spam. Unsubscribe anytime.</p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ─────────── FOOTER ─────────── -->
+    <footer class="footer" role="contentinfo">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a href="#" class="logo" aria-label="HorizonX Home">
+            <span class="logo-icon" aria-hidden="true">◈</span>
+            <span class="logo-text">HorizonX</span>
+          </a>
+          <p class="footer-tagline">Beyond the horizon.</p>
+          <div class="footer-socials">
+            <a class="social-icon" href="#" aria-label="Twitter">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
+              </svg>
+            </a>
+            <a class="social-icon" href="#" aria-label="Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="2" y="2" width="20" height="20" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+              </svg>
+            </a>
+            <a class="social-icon" href="#" aria-label="YouTube">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M22.54 6.42a2.78 2.78 0 00-1.95-1.95C18.88 4 12 4 12 4s-6.88 0-8.59.47a2.78 2.78 0 00-1.95 1.95A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z" />
+                <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#060308" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>Discover</h4>
+            <ul>
+              <li><a href="#trending">Trending</a></li>
+              <li><a href="#new-releases">New Releases</a></li>
+              <li><a href="#top-rated">Top Rated</a></li>
+              <li><a href="#genres">Genres</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Account</h4>
+            <ul>
+              <li><a href="#">Sign In</a></li>
+              <li><a href="#">My List</a></li>
+              <li><a href="#">Settings</a></li>
+              <li><a href="#">History</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Company</h4>
+            <ul>
+              <li><a href="#">About</a></li>
+              <li><a href="#">Press</a></li>
+              <li><a href="#">Careers</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="#">Privacy</a></li>
+              <li><a href="#">Terms</a></li>
+              <li><a href="#">Cookies</a></li>
+              <li><a href="#">DMCA</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2025 HorizonX. All rights reserved.</p>
+        <p class="footer-tech">Powered by VidKing &amp; TMDB</p>
+      </div>
+    </footer>
+
+    <!-- ─────────── MOVIE INFO MODAL ─────────── -->
+    <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Movie details"
+      aria-hidden="true">
+      <div class="modal" id="modal">
+        <button class="modal-close" id="modal-close" aria-label="Close modal">✕</button>
+
+        <div class="modal-poster" id="modal-poster" aria-hidden="true"></div>
+
+        <div class="modal-info">
+          <h2 class="modal-title" id="modal-title">—</h2>
+          <div class="modal-meta" id="modal-meta"></div>
+          <p class="modal-desc" id="modal-desc"></p>
+          <div class="modal-actions">
+            <button class="btn-primary" id="modal-play" aria-label="Play movie">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              Play
+            </button>
+            <button class="btn-trailer" id="modal-trailer" aria-label="Watch trailer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
+              </svg>
+              Trailer
+            </button>
+            <button class="btn-secondary" id="modal-list" aria-label="Add to list">+ My List</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

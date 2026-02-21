@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Watch — HorizonX</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@200;300;400;500;600&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="player.css" />
+</head>
+
+<body>
+
+    <!-- Back button -->
+    <a href="javascript:history.length > 1 ? history.back() : location.href='index.html'" class="back-btn" id="back-btn"
+        aria-label="Back to HorizonX">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="15 18 9 12 15 6" />
+        </svg>
+        <span>Back</span>
+    </a>
+
+    <!-- Logo watermark -->
+    <a href="index.html" class="player-logo" aria-label="HorizonX Home" style="text-decoration:none;">
+        <span class="logo-icon" style="color:var(--accent);font-size:18px;margin-right:6px;">◈</span>
+        <span class="logo-text"
+            style="font-family:'Orbitron', sans-serif;font-weight:700;letter-spacing:0.2em;color:rgba(255,255,255,0.6);font-size:16px;">HORIZONX</span>
+    </a>
+
+    <!-- ══════════ MAIN PLAYER AREA ══════════ -->
+    <main class="player-main">
+
+        <!-- Loading state -->
+        <div class="player-loader" id="player-loader" aria-live="polite">
+            <div class="loader-ring"></div>
+            <p class="loader-text">Loading player…</p>
+        </div>
+
+        <!-- VidKing iframe container -->
+        <div class="player-frame-wrap" id="player-frame-wrap" aria-hidden="true">
+            <iframe
+                id="vidking-iframe"
+                class="vidking-frame"
+                src=""
+                allowfullscreen
+                allow="autoplay; fullscreen; picture-in-picture"
+                sandbox="allow-scripts allow-same-origin"
+                referrerpolicy="no-referrer"
+                title="Video Player"
+                frameborder="0"
+            ></iframe>
+        </div>
+
+    </main>
+
+    <!-- ══════════ INFO PANEL (slides in from right) ══════════ -->
+    <aside class="info-panel" id="info-panel" aria-label="Movie information" aria-hidden="true">
+        <button class="info-close" id="info-close" aria-label="Close info panel">✕</button>
+
+        <div class="info-poster-wrap">
+            <img class="info-poster" id="info-poster" src="" alt="" />
+            <div class="info-poster-placeholder" id="info-poster-placeholder" aria-hidden="true"></div>
+        </div>
+
+        <div class="info-body">
+            <p class="info-type" id="info-type"></p>
+            <h1 class="info-title" id="info-title">Loading…</h1>
+            <div class="info-meta" id="info-meta"></div>
+            <p class="info-desc" id="info-desc"></p>
+            <div class="info-genres" id="info-genres"></div>
+        </div>
+    </aside>
+
+    <!-- ══════════ TV EPISODE SELECTOR ══════════ -->
+    <div class="ep-panel" id="ep-panel" aria-hidden="true">
+        <div class="ep-panel-header">
+            <h3 class="ep-panel-title">Episodes</h3>
+            <button class="ep-close" id="ep-close" aria-label="Close episode selector">✕</button>
+        </div>
+
+        <div class="ep-season-row" id="ep-season-row" role="list" aria-label="Seasons"></div>
+
+        <div class="ep-grid" id="ep-grid" role="list" aria-label="Episodes"></div>
+    </div>
+
+    <!-- ══════════ BOTTOM TOOLBAR ══════════ -->
+    <div class="toolbar" id="toolbar" aria-label="Player controls">
+
+        <!-- Left: movie title -->
+        <div class="toolbar-left">
+            <p class="toolbar-title" id="toolbar-title">—</p>
+            <p class="toolbar-sub" id="toolbar-sub">HorizonX</p>
+        </div>
+
+        <!-- Center: TV controls (hidden for movies) -->
+        <div class="toolbar-center" id="toolbar-center-tv" aria-hidden="true">
+            <button class="toolbar-btn" id="prev-ep-btn" aria-label="Previous episode">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="19 20 9 12 19 4 19 20" />
+                    <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2" />
+                </svg>
+                Prev
+            </button>
+            <span class="toolbar-ep-label" id="toolbar-ep-label">S1 E1</span>
+            <button class="toolbar-btn" id="next-ep-btn" aria-label="Next episode">
+                Next
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 4 15 12 5 20 5 4" />
+                    <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Right: action buttons -->
+        <div class="toolbar-right">
+            <button class="toolbar-btn" id="info-btn" aria-label="Movie info">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                Info
+            </button>
+            <button class="toolbar-btn" id="ep-btn" aria-label="Episodes" style="display:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
+                Episodes
+            </button>
+            <button class="toolbar-btn" id="wishlist-btn" aria-label="Add to watchlist">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                My List
+            </button>
+        </div>
+    </div>
+
+    <!-- Progress saved toast -->
+    <div class="toast" id="progress-toast" role="status" aria-live="polite" aria-hidden="true">
+        ✓ Progress saved
+    </div>
+
+    <script src="player.js"></script>
+</body>
+
+</html>

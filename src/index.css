@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-primary: #e50914;
+    --brand-secondary: #8b5cf6;
+    --brand-accent: #3b82f6;
+    --background: #0f0f11;
+    --foreground: #ffffff;
+    --bg-card: #1a1a1d;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-[#0f0f11] text-white antialiased min-h-screen selection:bg-[#e50914]/30 overflow-x-hidden;
+  }
+}
+
+@layer utilities {
+  .glassmorphism {
+    @apply bg-black/40 backdrop-blur-md border border-white/10 shadow-lg;
+  }
+
+  .glassmorphism-card {
+    @apply bg-white/5 backdrop-blur-sm border md:border-white/10 border-transparent hover:bg-white/10 transition-colors duration-300;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#8b5cf6] to-[#3b82f6];
+  }
+}
