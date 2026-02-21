@@ -134,13 +134,36 @@ app.get('/api/featured', async (req, res) => {
     }
 });
 
-/** GET /api/search?q=... — search movies */
+/** GET /api/series — trending TV series */
+app.get('/api/series', async (req, res) => {
+    try {
+        const data = await tmdb('/trending/tv/week');
+        res.json(data.results.map(normalise));
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/** GET /api/tv/popular — popular TV series */
+app.get('/api/tv/popular', async (req, res) => {
+    try {
+        const data = await tmdb('/tv/popular');
+        res.json(data.results.map(normalise));
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/** GET /api/search?q=... — search movies and TV (multi) */
 app.get('/api/search', async (req, res) => {
     const q = (req.query.q || '').trim().slice(0, 200);
     if (!q) return res.status(400).json({ error: 'Missing query param: q' });
     try {
-        const data = await tmdb('/search/movie', { query: q });
-        res.json(data.results.map(normalise));
+        const data = await tmdb('/search/multi', { query: q });
+        const filtered = (data.results || []).filter(
+            (r) => r.media_type === 'movie' || r.media_type === 'tv'
+        );
+        res.json(filtered.map(normalise));
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

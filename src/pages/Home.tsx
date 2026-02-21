@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Hero from '../components/ui/Hero';
 import Slider from '../components/ui/Slider';
-import { getTrending, getPopularMovies, type TMDBMedia } from '../services/tmdb';
+import { getTrending, getPopularMovies, getPopularTvSeries, type TMDBMedia } from '../services/tmdb';
 
 // Fallback data in case API key is missing or fails
 const fallbackMovies: TMDBMedia[] = [
@@ -13,18 +13,21 @@ const Home = () => {
     const [heroMedia, setHeroMedia] = useState<TMDBMedia | null>(null);
     const [trending, setTrending] = useState<TMDBMedia[]>([]);
     const [popular, setPopular] = useState<TMDBMedia[]>([]);
+    const [popularTv, setPopularTv] = useState<TMDBMedia[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [trendingData, popularData] = await Promise.all([
+                const [trendingData, popularData, popularTvData] = await Promise.all([
                     getTrending('all', 'week'),
-                    getPopularMovies()
+                    getPopularMovies(),
+                    getPopularTvSeries()
                 ]);
 
                 setTrending(trendingData);
                 setPopular(popularData);
+                setPopularTv(popularTvData);
 
                 if (trendingData.length > 0) {
                     // Select a random movie from top 5 trending for hero
@@ -36,6 +39,7 @@ const Home = () => {
                 // Use fallback if API fails (e.g. no key)
                 setTrending(fallbackMovies);
                 setPopular(fallbackMovies);
+                setPopularTv(fallbackMovies);
                 setHeroMedia(fallbackMovies[0]);
             } finally {
                 setLoading(false);
@@ -60,6 +64,7 @@ const Home = () => {
             <div className="container mx-auto px-0 md:px-4 -mt-16 md:-mt-24 relative z-30">
                 <Slider title="Trending This Week" items={trending} />
                 <Slider title="Popular Movies" items={popular} />
+                <Slider title="Popular TV Shows" items={popularTv} />
                 {/* We can add more sliders here easily */}
             </div>
         </div>

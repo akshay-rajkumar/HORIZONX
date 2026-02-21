@@ -21,6 +21,11 @@ export const getPopularMovies = async () => {
     return response.data.results;
 };
 
+export const getPopularTvSeries = async () => {
+    const response = await tmdbApi.get('/tv/popular');
+    return response.data.results;
+};
+
 export const getMovieDetails = async (id: string | number) => {
     const response = await tmdbApi.get(`/movie/${id}`, {
         params: { append_to_response: 'credits,videos,similar' }

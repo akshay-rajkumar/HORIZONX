@@ -48,6 +48,16 @@ const API = {
         catch { return PLACEHOLDER_MOVIES.slice(4, 14); }
     },
 
+    async fetchSeries() {
+        try { return await this.get('/api/series'); }
+        catch { return []; }
+    },
+
+    async fetchPopularTvSeries() {
+        try { return await this.get('/api/tv/popular'); }
+        catch { return []; }
+    },
+
     async fetchGenres() {
         try {
             const genres = await this.get('/api/genres');
@@ -481,7 +491,7 @@ function initNavbar() {
     });
 
     // Active nav link on scroll
-    const sections = ['trending', 'genres', 'new-releases'];
+    const sections = ['trending', 'new-releases', 'series', 'genres'];
     const navLinks = document.querySelectorAll('.nav-link');
 
     const observerCb = (entries) => {
@@ -751,6 +761,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await Promise.allSettled([
         populateRow('trending-row', API.fetchTrending.bind(API), false),
         populateRow('new-releases-row', API.fetchNewReleases.bind(API), false),
+        populateRow('series-row', API.fetchSeries.bind(API), false),
+        populateRow('popular-tv-row', API.fetchPopularTvSeries.bind(API), false),
         populateRow('top-rated-row', API.fetchTopRated.bind(API), true),
         loadGenreCounts(),
     ]);
@@ -760,6 +772,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ── ROW SCROLL ARROWS
     setupRowScroll('trending-row', 'trending-left', 'trending-right');
     setupRowScroll('new-releases-row', 'new-releases-left', 'new-releases-right');
+    setupRowScroll('series-row', 'series-left', 'series-right');
+    setupRowScroll('popular-tv-row', 'popular-tv-left', 'popular-tv-right');
     setupRowScroll('top-rated-row', 'top-rated-left', 'top-rated-right');
 
     // Modal close

@@ -33,6 +33,7 @@
         <li role="none"><a href="#genres" class="nav-link" id="nav-genres" role="menuitem">Genres</a></li>
         <li role="none"><a href="#new-releases" class="nav-link" id="nav-new-releases" role="menuitem">New Releases</a>
         </li>
+        <li role="none"><a href="#series" class="nav-link" id="nav-series" role="menuitem">Series</a></li>
         <li role="none"><a href="#" class="nav-link" role="menuitem">My List</a></li>
         <li role="none"><a href="disclaimer.html" class="nav-link" role="menuitem">Disclaimer</a></li>
       </ul>
@@ -73,6 +74,7 @@
     <a href="#trending" class="mobile-link">Trending</a>
     <a href="#genres" class="mobile-link">Genres</a>
     <a href="#new-releases" class="mobile-link">New Releases</a>
+    <a href="#series" class="mobile-link">Series</a>
     <a href="#" class="mobile-link">My List</a>
     <a href="disclaimer.html" class="mobile-link">Disclaimer</a>
   </div>
@@ -224,6 +226,46 @@
     </div>
   </section>
 
+  <!-- ─────────── SERIES ─────────── -->
+  <section class="row-section reveal-element" id="series" aria-label="Series">
+    <div class="section-header">
+      <div>
+        <div class="section-label">
+          <span class="label-line" aria-hidden="true"></span>
+          <span class="label-text">Binge Now</span>
+        </div>
+        <h2 class="section-title">Series</h2>
+      </div>
+      <button class="see-all-link see-all-btn" aria-label="See all series"
+        style="background:none;border:none;cursor:pointer;">See All →</button>
+    </div>
+    <div class="cards-wrapper">
+      <button class="scroll-arrow arrow-left" id="series-left" aria-label="Scroll left">‹</button>
+      <div class="cards-row" id="series-row" role="list" aria-label="TV series"></div>
+      <button class="scroll-arrow arrow-right" id="series-right" aria-label="Scroll right">›</button>
+    </div>
+  </section>
+
+  <!-- ─────────── POPULAR SERIES ─────────── -->
+  <section class="row-section reveal-element" id="popular-tv" aria-label="Popular Series">
+    <div class="section-header">
+      <div>
+        <div class="section-label">
+          <span class="label-line" aria-hidden="true"></span>
+          <span class="label-text">Top Picks</span>
+        </div>
+        <h2 class="section-title">Popular TV Shows</h2>
+      </div>
+      <button class="see-all-link see-all-btn" aria-label="See all popular series"
+        style="background:none;border:none;cursor:pointer;">See All →</button>
+    </div>
+    <div class="cards-wrapper">
+      <button class="scroll-arrow arrow-left" id="popular-tv-left" aria-label="Scroll left">‹</button>
+      <div class="cards-row" id="popular-tv-row" role="list" aria-label="Popular TV series"></div>
+      <button class="scroll-arrow arrow-right" id="popular-tv-right" aria-label="Scroll right">›</button>
+    </div>
+  </section>
+
   <!-- ─────────── GENRES ─────────── -->
   <section class="genres-section reveal-element" id="genres" aria-label="Browse by Genre">
     <div class="section-header" style="max-width:1440px;margin:0 auto;padding:0 48px 28px;">
@@ -314,156 +356,157 @@
 
   <!-- ─────────── TOP RATED ─────────── -->
   <section class="row-section reveal-element" id="top-rated" aria-label="Top Rated">
-      <div class="section-header">
-        <div>
-          <div class="section-label">
-            <span class="label-line" aria-hidden="true"></span>
-            <span class="label-text">Critically Acclaimed</span>
-          </div>
-          <h2 class="section-title">Top Rated</h2>
+    <div class="section-header">
+      <div>
+        <div class="section-label">
+          <span class="label-line" aria-hidden="true"></span>
+          <span class="label-text">Critically Acclaimed</span>
         </div>
-        <button class="see-all-link see-all-btn" aria-label="See all top rated"
-          style="background:none;border:none;cursor:pointer;">See All →</button>
+        <h2 class="section-title">Top Rated</h2>
       </div>
-      <div class="cards-wrapper">
-        <button class="scroll-arrow arrow-left" id="top-rated-left" aria-label="Scroll left">‹</button>
-        <div class="cards-row" id="top-rated-row" role="list" aria-label="Top rated movies"></div>
-        <button class="scroll-arrow arrow-right" id="top-rated-right" aria-label="Scroll right">›</button>
-      </div>
-    </section>
+      <button class="see-all-link see-all-btn" aria-label="See all top rated"
+        style="background:none;border:none;cursor:pointer;">See All →</button>
+    </div>
+    <div class="cards-wrapper">
+      <button class="scroll-arrow arrow-left" id="top-rated-left" aria-label="Scroll left">‹</button>
+      <div class="cards-row" id="top-rated-row" role="list" aria-label="Top rated movies"></div>
+      <button class="scroll-arrow arrow-right" id="top-rated-right" aria-label="Scroll right">›</button>
+    </div>
+  </section>
 
-    <!-- ─────────── NEWSLETTER ─────────── -->
-    <section class="newsletter-section reveal-element" aria-label="Newsletter">
-      <div class="newsletter-inner">
-        <div>
-          <p class="newsletter-eyebrow">Stay in the Loop</p>
-          <h2 class="newsletter-title">Never Miss<br>a Premiere</h2>
-          <p class="newsletter-sub">Get personalised recommendations, early access announcements and curated watchlists
-            straight to your inbox.</p>
+  <!-- ─────────── NEWSLETTER ─────────── -->
+  <section class="newsletter-section reveal-element" aria-label="Newsletter">
+    <div class="newsletter-inner">
+      <div>
+        <p class="newsletter-eyebrow">Stay in the Loop</p>
+        <h2 class="newsletter-title">Never Miss<br>a Premiere</h2>
+        <p class="newsletter-sub">Get personalised recommendations, early access announcements and curated watchlists
+          straight to your inbox.</p>
+      </div>
+      <form class="newsletter-form" id="newsletter-form" aria-label="Newsletter signup">
+        <div class="form-row">
+          <input class="email-input" id="email-input" type="email" placeholder="your@email.com" autocomplete="email"
+            aria-label="Email address" required />
+          <button class="btn-primary" id="newsletter-submit" type="submit" aria-label="Subscribe">Subscribe</button>
         </div>
-        <form class="newsletter-form" id="newsletter-form" aria-label="Newsletter signup">
-          <div class="form-row">
-            <input class="email-input" id="email-input" type="email" placeholder="your@email.com" autocomplete="email"
-              aria-label="Email address" required />
-            <button class="btn-primary" id="newsletter-submit" type="submit" aria-label="Subscribe">Subscribe</button>
-          </div>
-          <p class="form-note">No spam. Unsubscribe anytime.</p>
-        </form>
-      </div>
-    </section>
+        <p class="form-note">No spam. Unsubscribe anytime.</p>
+      </form>
+    </div>
+  </section>
 
-    <!-- ─────────── FOOTER ─────────── -->
-    <footer class="footer" role="contentinfo">
-      <div class="footer-inner">
-        <div class="footer-brand">
-          <a href="#" class="logo" aria-label="HorizonX Home">
-            <span class="logo-icon" aria-hidden="true">◈</span>
-            <span class="logo-text">HorizonX</span>
+  <!-- ─────────── FOOTER ─────────── -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo" aria-label="HorizonX Home">
+          <span class="logo-icon" aria-hidden="true">◈</span>
+          <span class="logo-text">HorizonX</span>
+        </a>
+        <p class="footer-tagline">Beyond the horizon.</p>
+        <div class="footer-socials">
+          <a class="social-icon" href="#" aria-label="Twitter">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
+            </svg>
           </a>
-          <p class="footer-tagline">Beyond the horizon.</p>
-          <div class="footer-socials">
-            <a class="social-icon" href="#" aria-label="Twitter">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
-              </svg>
-            </a>
-            <a class="social-icon" href="#" aria-label="Instagram">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <rect x="2" y="2" width="20" height="20" rx="5" />
-                <circle cx="12" cy="12" r="4" />
-                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-              </svg>
-            </a>
-            <a class="social-icon" href="#" aria-label="YouTube">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M22.54 6.42a2.78 2.78 0 00-1.95-1.95C18.88 4 12 4 12 4s-6.88 0-8.59.47a2.78 2.78 0 00-1.95 1.95A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z" />
-                <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#060308" />
-              </svg>
-            </a>
-          </div>
-        </div>
-
-        <div class="footer-links">
-          <div class="footer-col">
-            <h4>Discover</h4>
-            <ul>
-              <li><a href="#trending">Trending</a></li>
-              <li><a href="#new-releases">New Releases</a></li>
-              <li><a href="#top-rated">Top Rated</a></li>
-              <li><a href="#genres">Genres</a></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h4>Account</h4>
-            <ul>
-              <li><a href="#">Sign In</a></li>
-              <li><a href="#">My List</a></li>
-              <li><a href="#">Settings</a></li>
-              <li><a href="#">History</a></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h4>Company</h4>
-            <ul>
-              <li><a href="#">About</a></li>
-              <li><a href="#">Press</a></li>
-              <li><a href="#">Careers</a></li>
-              <li><a href="#">Contact</a></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h4>Legal</h4>
-            <ul>
-              <li><a href="disclaimer.html">Disclaimer</a></li>
-              <li><a href="#">Privacy</a></li>
-              <li><a href="#">Terms</a></li>
-              <li><a href="#">Cookies</a></li>
-              <li><a href="#">DMCA</a></li>
-            </ul>
-          </div>
+          <a class="social-icon" href="#" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="2" width="20" height="20" rx="5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+            </svg>
+          </a>
+          <a class="social-icon" href="#" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M22.54 6.42a2.78 2.78 0 00-1.95-1.95C18.88 4 12 4 12 4s-6.88 0-8.59.47a2.78 2.78 0 00-1.95 1.95A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z" />
+              <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#060308" />
+            </svg>
+          </a>
         </div>
       </div>
 
-      <div class="footer-bottom">
-        <p>© 2026 HorizonX. All rights reserved.</p>
-      </div>
-    </footer>
-
-    <!-- ─────────── MOVIE INFO MODAL ─────────── -->
-    <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Movie details"
-      aria-hidden="true">
-      <div class="modal" id="modal">
-        <button class="modal-close" id="modal-close" aria-label="Close modal">✕</button>
-
-        <div class="modal-poster" id="modal-poster" aria-hidden="true"></div>
-
-        <div class="modal-info">
-          <h2 class="modal-title" id="modal-title">—</h2>
-          <div class="modal-meta" id="modal-meta"></div>
-          <p class="modal-desc" id="modal-desc"></p>
-          <div class="modal-actions">
-            <button class="btn-primary" id="modal-play" aria-label="Play movie">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-              Play
-            </button>
-            <button class="btn-trailer" id="modal-trailer" aria-label="Watch trailer">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
-              </svg>
-              Trailer
-            </button>
-            <button class="btn-secondary" id="modal-list" aria-label="Add to list">+ My List</button>
-          </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Discover</h4>
+          <ul>
+            <li><a href="#trending">Trending</a></li>
+            <li><a href="#new-releases">New Releases</a></li>
+            <li><a href="#series">Series</a></li>
+            <li><a href="#top-rated">Top Rated</a></li>
+            <li><a href="#genres">Genres</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Account</h4>
+          <ul>
+            <li><a href="#">Sign In</a></li>
+            <li><a href="#">My List</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">History</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Press</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="disclaimer.html">Disclaimer</a></li>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+            <li><a href="#">Cookies</a></li>
+            <li><a href="#">DMCA</a></li>
+          </ul>
         </div>
       </div>
     </div>
 
-    <script src="app.js"></script>
+    <div class="footer-bottom">
+      <p>© 2026 HorizonX. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ─────────── MOVIE INFO MODAL ─────────── -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Movie details"
+    aria-hidden="true">
+    <div class="modal" id="modal">
+      <button class="modal-close" id="modal-close" aria-label="Close modal">✕</button>
+
+      <div class="modal-poster" id="modal-poster" aria-hidden="true"></div>
+
+      <div class="modal-info">
+        <h2 class="modal-title" id="modal-title">—</h2>
+        <div class="modal-meta" id="modal-meta"></div>
+        <p class="modal-desc" id="modal-desc"></p>
+        <div class="modal-actions">
+          <button class="btn-primary" id="modal-play" aria-label="Play movie">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            Play
+          </button>
+          <button class="btn-trailer" id="modal-trailer" aria-label="Watch trailer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
+            </svg>
+            Trailer
+          </button>
+          <button class="btn-secondary" id="modal-list" aria-label="Add to list">+ My List</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 
 </html>
