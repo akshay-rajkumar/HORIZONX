@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="HorizonX — Disclaimer, educational purpose, and copyright notice." />
+  <title>Disclaimer — HorizonX</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .legal-page {
+      min-height: 100vh;
+      background: var(--bg-void);
+      padding: calc(var(--nav-h) + 40px) 24px 80px;
+    }
+    .legal-inner {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .legal-page .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 32px;
+    }
+    .legal-page .logo:hover {
+      color: var(--red-bright);
+    }
+    .legal-page h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 2.75rem);
+      color: var(--text-primary);
+      letter-spacing: 0.06em;
+      margin-bottom: 40px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-glass);
+    }
+    .legal-page h2 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      color: var(--red);
+      letter-spacing: 0.04em;
+      margin-top: 40px;
+      margin-bottom: 16px;
+    }
+    .legal-page p, .legal-page ul {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .legal-page ul {
+      padding-left: 1.5rem;
+      margin-bottom: 24px;
+    }
+    .legal-page li {
+      margin-bottom: 8px;
+    }
+    .legal-page a[href^="mailto"],
+    .legal-page a[href^="http"] {
+      color: var(--red-bright);
+      text-decoration: none;
+    }
+    .legal-page a[href^="mailto"]:hover,
+    .legal-page a[href^="http"]:hover {
+      text-decoration: underline;
+    }
+    .legal-page hr {
+      border: none;
+      border-top: 1px solid var(--border-glass);
+      margin: 32px 0;
+    }
+    .legal-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    .legal-back:hover {
+      color: var(--red);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navbar (minimal for legal page) -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="logo" aria-label="HorizonX Home">
+        <span class="logo-icon" aria-hidden="true">◈</span>
+        <span class="logo-text">HorizonX</span>
+      </a>
+      <ul class="nav-links" role="menubar">
+        <li role="none"><a href="index.html" class="nav-link" role="menuitem">Home</a></li>
+        <li role="none"><a href="index.html#trending" class="nav-link" role="menuitem">Trending</a></li>
+        <li role="none"><a href="index.html#genres" class="nav-link" role="menuitem">Genres</a></li>
+        <li role="none"><a href="disclaimer.html" class="nav-link" role="menuitem">Disclaimer</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="index.html" class="btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">Back to Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="legal-page">
+    <div class="legal-inner">
+      <a href="index.html" class="legal-back" aria-label="Back to HorizonX">← Back to Home</a>
+
+      <h1>Disclaimer</h1>
+
+      <h2>Educational Purpose</h2>
+      <p>HorizonX is a student project created for <strong>educational and learning purposes only</strong>.</p>
+      <p>This project was developed to explore:</p>
+      <ul>
+        <li>Full-stack web development</li>
+        <li>API integration</li>
+        <li>Video streaming technology</li>
+        <li>User interface design</li>
+        <li>Backend server architecture</li>
+      </ul>
+      <p>This project is <strong>not intended for commercial use.</strong></p>
+
+      <hr />
+
+      <h2>Content Information</h2>
+      <p>HorizonX does not host any video content on its own servers.</p>
+      <p>Movie information and posters are provided by the <strong>TMDB API</strong>.</p>
+      <p>This application acts only as a technical demonstration of a streaming platform interface.</p>
+
+      <hr />
+
+      <h2>Copyright Notice</h2>
+      <p>All trademarks, movie titles, posters, and related content belong to their respective owners.</p>
+      <p>If you are a copyright owner and believe your content appears in this project and should be removed, please contact us. We will respond and take action as quickly as possible.</p>
+
+      <hr />
+
+      <h2>Contact</h2>
+      <p>For copyright concerns or questions:</p>
+      <p><strong>Email:</strong> <a href="mailto:akshay24127@gmail.com">akshay24127@gmail.com</a></p>
+
+      <hr />
+
+      <h2>Notice</h2>
+      <p>This project is maintained solely as a learning exercise by a student developer.</p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo" aria-label="HorizonX Home">
+          <span class="logo-icon" aria-hidden="true">◈</span>
+          <span class="logo-text">HorizonX</span>
+        </a>
+        <p class="footer-tagline">Beyond the horizon.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="disclaimer.html">Disclaimer</a></li>
+            <li><a href="index.html">Home</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 HorizonX. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+
+</html>
