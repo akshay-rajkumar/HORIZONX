@@ -736,10 +736,43 @@ function initPageTransition() {
 }
 
 /* ════════════════════════════════════════════════════
+   API HEALTH CHECK — warn if TMDB key is missing
+════════════════════════════════════════════════════ */
+async function checkApiHealth() {
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/health`);
+        const data = await res.json();
+        if (!data.tmdbKeySet) showApiBanner();
+    } catch {
+        showApiBanner();
+    }
+}
+
+function showApiBanner() {
+    const banner = document.createElement('div');
+    banner.id = 'api-warning-banner';
+    banner.setAttribute('role', 'alert');
+    Object.assign(banner.style, {
+        position: 'fixed', top: '0', left: '0', right: '0', zIndex: '9999',
+        background: 'linear-gradient(90deg, #8C0A1A, #E0102A)', color: '#fff',
+        textAlign: 'center', padding: '12px 20px',
+        fontSize: '13px', fontWeight: '600', letterSpacing: '0.04em',
+        fontFamily: 'var(--font-body)', boxShadow: '0 4px 20px rgba(224,16,42,0.4)',
+    });
+    banner.textContent = '⚠️ API key not configured — movie data unavailable. See README for setup.';
+    document.body.prepend(banner);
+    // Push navbar down so it doesn't overlap
+    document.documentElement.style.setProperty('--banner-offset', '40px');
+    const navbar = document.getElementById('navbar');
+    if (navbar) navbar.style.top = '64px';
+}
+
+/* ════════════════════════════════════════════════════
    BOOT
 ════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
     initPageTransition();
+    checkApiHealth();
     initNavbar();
     initSearch();
     initSeeAll();

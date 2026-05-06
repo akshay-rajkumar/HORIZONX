@@ -8,8 +8,7 @@
 
 /* ── CONFIG ─────────────────────────────────────────── */
 const BACKEND = (typeof window !== 'undefined' && window.location.port === '3001') ? 'http://localhost:3001' : '';
-const VIDKING = 'https://www.vidking.net/embed'; // VidKing base
-const GOLD_HEX = 'C9A84C';                        // accent color (no #)
+const VIDSYNC = 'https://vidsync.xyz/embed'; // VidSync base
 
 /* ── READ URL PARAMS ─────────────────────────────────── */
 const params = new URLSearchParams(window.location.search);
@@ -47,43 +46,18 @@ const toast = document.getElementById('progress-toast');
 /* ════════════════════════════════════════════════════
    VIDKING EMBED URL BUILDER
 ════════════════════════════════════════════════════ */
-function buildEmbedUrl(id, type, season, episode, progressSeconds = 0) {
-    let url;
+function buildEmbedUrl(id, type, season, episode) {
     if (type === 'tv') {
-        url = `${VIDKING}/tv/${id}/${season}/${episode}`;
-    } else {
-        url = `${VIDKING}/movie/${id}`;
+        return `${VIDSYNC}/tv/${id}/${season}/${episode}?autoPlay=true&autoNext=true&nextButton=true`;
     }
-
-    const p = new URLSearchParams({
-        color: GOLD_HEX,
-        autoPlay: 'true',
-        nextEpisode: type === 'tv' ? 'true' : 'false',
-        episodeSelector: type === 'tv' ? 'true' : 'false',
-    });
-
-    if (progressSeconds > 0) p.set('progress', progressSeconds);
-
-    return `${url}?${p.toString()}`;
+    return `${VIDSYNC}/movie/${id}?autoPlay=true`;
 }
 
 /* ════════════════════════════════════════════════════
    LOAD IFRAME
 ════════════════════════════════════════════════════ */
 function loadPlayer(season, episode) {
-    // Get saved progress
-    let progress = 0;
-    try {
-        const saved = JSON.parse(localStorage.getItem(storageKey()) || '{}');
-        if (MEDIA_TYPE === 'tv') {
-            const epKey = `s${season}e${episode}`;
-            progress = saved[epKey] || 0;
-        } else {
-            progress = saved.time || 0;
-        }
-    } catch (_) { }
-
-    const url = buildEmbedUrl(MEDIA_ID, MEDIA_TYPE, season, episode, progress);
+    const url = buildEmbedUrl(MEDIA_ID, MEDIA_TYPE, season, episode);
     iframe.src = url;
 
     // Show loader, hide frame until ready

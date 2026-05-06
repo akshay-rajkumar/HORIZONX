@@ -48,7 +48,7 @@ function validId(id) {
 
 /* ── Utility: call TMDB ───────────────────────────────── */
 async function tmdb(tmdbPath, params = {}) {
-    if (!TMDB_KEY) throw new Error('TMDB_API_KEY not set in .env');
+    if (!TMDB_KEY || TMDB_KEY === 'YOUR_TMDB_API_KEY_HERE') throw new Error('TMDB_API_KEY not set in .env');
     const url = new URL(`${TMDB_BASE}${tmdbPath}`);
     url.searchParams.set('api_key', TMDB_KEY);
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
@@ -264,7 +264,7 @@ app.get('/api/tv/:id/trailer', async (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({
         ok: true,
-        tmdbKeySet: !!TMDB_KEY,
+        tmdbKeySet: !!TMDB_KEY && TMDB_KEY !== 'YOUR_TMDB_API_KEY_HERE',
         time: new Date().toISOString(),
     });
 });
@@ -276,8 +276,8 @@ app.get('/', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
 
 /* ── Start ───────────────────────────────────────────── */
 app.listen(PORT, () => {
-    console.log(`◈ CineVault Backend running → http://localhost:${PORT}`);
-    if (!TMDB_KEY) {
-        console.warn('⚠  TMDB_API_KEY not set. Add it to .env and restart.');
+    console.log(`◈ HorizonX Backend running → http://localhost:${PORT}`);
+    if (!TMDB_KEY || TMDB_KEY === 'YOUR_TMDB_API_KEY_HERE') {
+        console.error('\x1b[31m❌ ERROR: TMDB_API_KEY is not set in .env — movie posters and data will not load. Get your free key at https://www.themoviedb.org/settings/api\x1b[0m');
     }
 });
