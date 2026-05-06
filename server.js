@@ -89,6 +89,150 @@ function normalise(raw) {
    ROUTES
 ════════════════════════════════════════════════════════ */
 
+async function fetchMultiplePages(path, params = {}, pages = 5) {
+  const all = [];
+  for (let p = 1; p <= pages; p++) {
+    try {
+      const data = await tmdb(path, { ...params, page: p });
+      if (data.results) all.push(...data.results);
+    } catch (_) { break; }
+  }
+  return all;
+}
+
+/* ── MOVIES category routes ───────────────────────── */
+app.get('/api/movies/latest', async (req, res) => {
+    try {
+        const results = await fetchMultiplePages('/discover/movie', {
+            sort_by: 'primary_release_date.desc',
+            'vote_count.gte': 50,
+            'vote_average.gte': 5
+        });
+        res.json({ results: results.map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/movies/top-rated', async (req, res) => {
+    try {
+        const results = await fetchMultiplePages('/discover/movie', {
+            sort_by: 'vote_average.desc',
+            'vote_count.gte': 500
+        });
+        res.json({ results: results.map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/movies/featured', async (req, res) => {
+    try {
+        const data = await tmdb('/movie/popular');
+        const results = data.results.slice(0, 5);
+        res.json({ results: results.map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── TV SHOWS category routes ─────────────────────── */
+app.get('/api/tv/latest', async (req, res) => {
+    try {
+        const results = await fetchMultiplePages('/discover/tv', {
+            sort_by: 'first_air_date.desc',
+            'vote_count.gte': 20,
+            'vote_average.gte': 5
+        });
+        res.json({ results: results.map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/tv/top-rated', async (req, res) => {
+    try {
+        const results = await fetchMultiplePages('/discover/tv', {
+            sort_by: 'vote_average.desc',
+            'vote_count.gte': 200
+        });
+        res.json({ results: results.map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/tv/featured', async (req, res) => {
+    try {
+        const data = await tmdb('/tv/popular');
+        const results = data.results.slice(0, 5);
+        res.json({ results: results.map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── ANIME category routes (Japanese animation) ───── */
+app.get('/api/anime/latest', async (req, res) => {
+    try {
+        const results = await fetchMultiplePages('/discover/tv', {
+            with_genres: '16',
+            with_origin_country: 'JP',
+            sort_by: 'first_air_date.desc',
+            'vote_count.gte': 10
+        });
+        res.json({ results: results.map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/anime/top-rated', async (req, res) => {
+    try {
+        const results = await fetchMultiplePages('/discover/tv', {
+            with_genres: '16',
+            with_origin_country: 'JP',
+            sort_by: 'vote_average.desc',
+            'vote_count.gte': 100
+        });
+        res.json({ results: results.map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/anime/featured', async (req, res) => {
+    try {
+        const results = await fetchMultiplePages('/discover/tv', {
+            with_genres: '16',
+            with_origin_country: 'JP',
+            sort_by: 'popularity.desc',
+            'vote_count.gte': 200
+        }, 1);
+        res.json({ results: results.slice(0, 5).map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── K-DRAMA category routes (Korean TV) ──────────── */
+app.get('/api/kdrama/latest', async (req, res) => {
+    try {
+        const results = await fetchMultiplePages('/discover/tv', {
+            with_origin_country: 'KR',
+            sort_by: 'first_air_date.desc',
+            'vote_count.gte': 10
+        });
+        res.json({ results: results.map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/kdrama/top-rated', async (req, res) => {
+    try {
+        const results = await fetchMultiplePages('/discover/tv', {
+            with_origin_country: 'KR',
+            sort_by: 'vote_average.desc',
+            'vote_count.gte': 100
+        });
+        res.json({ results: results.map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/kdrama/featured', async (req, res) => {
+    try {
+        const results = await fetchMultiplePages('/discover/tv', {
+            with_origin_country: 'KR',
+            sort_by: 'popularity.desc',
+            'vote_count.gte': 100
+        }, 1);
+        res.json({ results: results.slice(0, 5).map(normalise) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── EXISTING ROUTES ──────────────────────────────── */
+
 /** GET /api/trending — weekly trending movies */
 app.get('/api/trending', async (req, res) => {
     try {
