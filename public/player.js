@@ -212,7 +212,9 @@ function renderEpisodes(episodes, season) {
   });
 
   const activeCard = episodeGrid.querySelector('.ep-card.active');
-  if (activeCard) setTimeout(() => activeCard.scrollIntoView({ behavior:'smooth', block:'center' }), 80);
+  if (activeCard && episodePanel.classList.contains('open')) {
+    setTimeout(() => activeCard.scrollIntoView({ behavior:'smooth', block:'center' }), 80);
+  }
 }
 
 /* ── PANELS ──────────────────────────────────── */
@@ -221,6 +223,9 @@ function openEpisodePanel() {
   episodePanel.classList.add('open');
   panelBackdrop.classList.add('visible');
   btnEpisodes.classList.add('active');
+  
+  const activeCard = episodeGrid.querySelector('.ep-card.active');
+  if (activeCard) setTimeout(() => activeCard.scrollIntoView({ behavior:'smooth', block:'center' }), 300);
 }
 function closeEpisodePanel() {
   episodePanel.classList.remove('open');
