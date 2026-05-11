@@ -473,3 +473,5 @@ app.listen(PORT, () => {
         console.error('\x1b[31m❌ ERROR: TMDB_API_KEY is not set in .env — movie posters and data will not load. Get your free key at https://www.themoviedb.org/settings/api\x1b[0m');
     }
 });
+
+module.exports = app;
