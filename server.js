@@ -22,9 +22,21 @@ const TMDB_BASE = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p';
 
 /* ── Security: headers ───────────────────────────────── */
+app.use((req, res, next) => {
+  res.removeHeader('X-Frame-Options');
+  res.removeHeader('Content-Security-Policy');
+  res.removeHeader('Cross-Origin-Embedder-Policy');
+  res.removeHeader('Cross-Origin-Resource-Policy');
+  res.removeHeader('Cross-Origin-Opener-Policy');
+  next();
+});
+
 app.use(helmet({
-    contentSecurityPolicy: false, // allow inline scripts/styles if needed; tighten for production
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy:     false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: false,
+  crossOriginOpenerPolicy:   false,
+  frameguard:                false
 }));
 
 /* ── Rate limiting (API abuse protection) ────────────── */
@@ -338,17 +350,53 @@ app.get('/api/tv/:id', async (req, res) => {
     }
 });
 
-/** GET /api/tv/:id/season/:season_number — TV season details for episode count */
-app.get('/api/tv/:id/season/:season_number', async (req, res) => {
-    if (!validId(req.params.id)) return res.status(400).json({ error: 'Invalid tv id' });
-    if (!validId(req.params.season_number)) return res.status(400).json({ error: 'Invalid season number' });
-    try {
-        const raw = await tmdb(`/tv/${req.params.id}/season/${req.params.season_number}`);
-        // Return exactly what the player expects: { episodes: count }
-        res.json({ episodes: raw.episodes ? raw.episodes.length : 0 });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
+// --- Route 1: Get all seasons for a TV show ---
+app.get('/api/tv/:id/seasons', async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!/^\d+$/.test(id)) return res.status(400).json({ error: 'Invalid ID' });
+    const data = await tmdb(`/tv/${id}`);
+    const seasons = (data.seasons || [])
+      .filter(s => s.season_number > 0)
+      .map(s => ({
+        id:            s.id,
+        season_number: s.season_number,
+        name:          s.name,
+        episode_count: s.episode_count,
+        poster:        s.poster_path,
+        air_date:      s.air_date
+      }));
+    res.json({ seasons });
+  } catch (err) {
+    console.error('Error fetching seasons:', err.message);
+    res.status(500).json({ error: 'Failed to fetch seasons' });
+  }
+});
+
+// --- Route 2: Get all episodes for a specific season ---
+app.get('/api/tv/:id/season/:season', async (req, res) => {
+  try {
+    const { id, season } = req.params;
+    if (!/^\d+$/.test(id) || !/^\d+$/.test(season)) {
+      return res.status(400).json({ error: 'Invalid parameters' });
     }
+    const data = await tmdb(`/tv/${id}/season/${season}`);
+    const episodes = (data.episodes || []).map(ep => ({
+      id:             ep.id,
+      episode_number: ep.episode_number,
+      season_number:  ep.season_number,
+      name:           ep.name,
+      overview:       ep.overview,
+      still:          ep.still_path,
+      air_date:       ep.air_date,
+      runtime:        ep.runtime,
+      rating:         ep.vote_average ? parseFloat(ep.vote_average.toFixed(1)) : null
+    }));
+    res.json({ season_number: parseInt(season), episodes });
+  } catch (err) {
+    console.error('Error fetching episodes:', err.message);
+    res.status(500).json({ error: 'Failed to fetch episodes' });
+  }
 });
 
 /** GET /api/genres — genre list with counts */

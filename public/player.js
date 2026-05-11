@@ -1,379 +1,371 @@
-/* ═══════════════════════════════════════════════════════
-   HorizonX — Player Page JavaScript
-   Reads URL params, builds VidKing embed, handles TV episodes,
-   watch-progress via postMessage + localStorage
-═══════════════════════════════════════════════════════ */
-
 'use strict';
 
-/* ── CONFIG ─────────────────────────────────────────── */
-const BACKEND = (typeof window !== 'undefined' && window.location.port === '3001') ? 'http://localhost:3001' : '';
-const VIDSYNC = 'https://vidsync.xyz/embed'; // VidSync base
+/* ── URL PARAMS ──────────────────────────────── */
+const params     = new URLSearchParams(window.location.search);
+const MEDIA_ID   = params.get('id');
+const MEDIA_TYPE = params.get('type') || 'movie';
+let   SEASON     = parseInt(params.get('season'))  || 1;
+let   EPISODE    = parseInt(params.get('episode')) || 1;
 
-/* ── READ URL PARAMS ─────────────────────────────────── */
-const params = new URLSearchParams(window.location.search);
-const MEDIA_ID = params.get('id') || '';
-const MEDIA_TYPE = params.get('type') || 'movie'; // 'movie' | 'tv'
-let currentSeason = parseInt(params.get('season')) || 1;
-let currentEpisode = parseInt(params.get('episode')) || 1;
-let totalSeasons = 1;
-let episodeCounts = {};   // { season: epCount }
+/* ── DOM ─────────────────────────────────────── */
+const playerFrame       = document.getElementById('playerFrame');
+const loadingSpinner    = document.getElementById('loadingSpinner');
+const btnEpisodes       = document.getElementById('btnEpisodes');
+const btnInfo           = document.getElementById('btnInfo');
+const btnPrev           = document.getElementById('btnPrev');
+const btnNext           = document.getElementById('btnNext');
+const episodePanel      = document.getElementById('episodePanel');
+const episodePanelClose = document.getElementById('episodePanelClose');
+const seasonTabs        = document.getElementById('seasonTabs');
+const episodeGrid       = document.getElementById('episodeGrid');
+const infoPanel         = document.getElementById('infoPanel');
+const infoPanelClose    = document.getElementById('infoPanelClose');
+const panelBackdrop     = document.getElementById('panelBackdrop');
+const infoPoster        = document.getElementById('infoPoster');
+const infoTitle         = document.getElementById('infoTitle');
+const infoMeta          = document.getElementById('infoMeta');
+const infoGenres        = document.getElementById('infoGenres');
+const infoDesc          = document.getElementById('infoDesc');
 
-/* ── STORAGE KEY ─────────────────────────────────────── */
-const storageKey = () => `cv_progress_${MEDIA_TYPE}_${MEDIA_ID}`;
+/* ── STATE ───────────────────────────────────── */
+let allSeasons   = [];
+let episodeCache = {};
+let activeSeason = SEASON;
+const TMDB_IMG   = 'https://image.tmdb.org/t/p/';
 
-/* ── ELEMENTS ────────────────────────────────────────── */
-const iframe = document.getElementById('vidking-iframe');
-const frameWrap = document.getElementById('player-frame-wrap');
-const loader = document.getElementById('player-loader');
-const infoPanel = document.getElementById('info-panel');
-const infoBtn = document.getElementById('info-btn');
-const infoClose = document.getElementById('info-close');
-const epPanel = document.getElementById('ep-panel');
-const epBtn = document.getElementById('ep-btn');
-const epClose = document.getElementById('ep-close');
-const epSeasonRow = document.getElementById('ep-season-row');
-const epGrid = document.getElementById('ep-grid');
-const toolbarCenterTV = document.getElementById('toolbar-center-tv');
-const toolbarTitle = document.getElementById('toolbar-title');
-const toolbarSub = document.getElementById('toolbar-sub');
-const toolbarEpLabel = document.getElementById('toolbar-ep-label');
-const prevEpBtn = document.getElementById('prev-ep-btn');
-const nextEpBtn = document.getElementById('next-ep-btn');
-const wishlistBtn = document.getElementById('wishlist-btn');
-const toast = document.getElementById('progress-toast');
-
-/* ════════════════════════════════════════════════════
-   VIDKING EMBED URL BUILDER
-════════════════════════════════════════════════════ */
-function buildEmbedUrl(id, type, season, episode) {
-    if (type === 'tv') {
-        return `${VIDSYNC}/tv/${id}/${season}/${episode}?autoPlay=true&autoNext=true&nextButton=true`;
-    }
-    return `${VIDSYNC}/movie/${id}?autoPlay=true`;
+/* ── BUILD EMBED URL ─────────────────────────── */
+function buildEmbedURL(season, episode) {
+  if (MEDIA_TYPE === 'tv') {
+    return `https://vidsync.xyz/embed/tv/${MEDIA_ID}/${season}/${episode}?autoPlay=true&autoNext=true&nextButton=true`;
+  }
+  return `https://vidsync.xyz/embed/movie/${MEDIA_ID}?autoPlay=true`;
 }
 
-/* ════════════════════════════════════════════════════
-   LOAD IFRAME
-════════════════════════════════════════════════════ */
+/* ── LOAD PLAYER ─────────────────────────────── */
 function loadPlayer(season, episode) {
-    const url = buildEmbedUrl(MEDIA_ID, MEDIA_TYPE, season, episode);
-    iframe.src = url;
+  SEASON  = season;
+  EPISODE = episode;
 
-    // Show loader, hide frame until ready
-    loader.classList.remove('hidden');
-    frameWrap.classList.remove('visible');
-    frameWrap.setAttribute('aria-hidden', 'true');
+  const newURL = new URL(window.location.href);
+  newURL.searchParams.set('season',  season);
+  newURL.searchParams.set('episode', episode);
+  window.history.replaceState(null, '', newURL.toString());
 
-    // Listen for iframe to become interactive (best effort via load event)
-    iframe.onload = () => {
-        setTimeout(() => {
-            loader.classList.add('hidden');
-            frameWrap.classList.add('visible');
-            frameWrap.removeAttribute('aria-hidden');
-        }, 600);
-    };
+  /* Show spinner */
+  loadingSpinner.classList.remove('done');
 
-    // Update toolbar
-    if (MEDIA_TYPE === 'tv') {
-        toolbarEpLabel.textContent = `S${season} E${episode}`;
-    }
-}
+  /* Set iframe src */
+  const embedURL = buildEmbedURL(season, episode);
+  playerFrame.setAttribute('src', embedURL);
 
-/* ════════════════════════════════════════════════════
-   FETCH METADATA FROM BACKEND
-════════════════════════════════════════════════════ */
-async function fetchMeta() {
-    if (!MEDIA_ID) return null;
+  /* Hide spinner after load */
+  playerFrame.onload = () => {
+    setTimeout(() => loadingSpinner.classList.add('done'), 500);
+  };
+
+  /* Fallback: hide spinner after 8 seconds regardless */
+  setTimeout(() => loadingSpinner.classList.add('done'), 8000);
+
+  /* Save progress */
+  if (MEDIA_TYPE === 'tv') {
     try {
-        const res = await fetch(`${BACKEND}/api/${MEDIA_TYPE}/${MEDIA_ID}`);
-        if (!res.ok) throw new Error('Backend unavailable');
-        return res.json();
-    } catch {
-        // If backend is down, return minimal info
-        return null;
-    }
-}
+      localStorage.setItem(
+        `hx_progress_${MEDIA_ID}`,
+        JSON.stringify({ season, episode, ts: Date.now() })
+      );
+    } catch (e) {}
+  }
 
-async function fetchTvSeasons(id) {
-    try {
-        const res = await fetch(`${BACKEND}/api/tv/${id}`);
-        if (!res.ok) throw new Error();
-        return res.json();
-    } catch {
-        return null;
-    }
-}
-
-/* ════════════════════════════════════════════════════
-   POPULATE INFO PANEL
-════════════════════════════════════════════════════ */
-function populateInfoPanel(meta) {
-    if (!meta) {
-        document.getElementById('info-title').textContent = `Movie #${MEDIA_ID}`;
-        document.getElementById('info-type').textContent = MEDIA_TYPE.toUpperCase();
-        document.getElementById('info-desc').textContent = 'Connect the backend to display metadata.';
-        return;
-    }
-
-    // Poster
-    const posterImg = document.getElementById('info-poster');
-    const posterPh = document.getElementById('info-poster-placeholder');
-    if (meta.posterUrl) {
-        posterImg.src = meta.posterUrl;
-        posterImg.alt = meta.title;
-        posterImg.onload = () => posterImg.classList.add('loaded');
-        posterPh.style.display = 'none';
-    } else {
-        posterPh.textContent = meta.title;
-    }
-
-    document.getElementById('info-type').textContent = meta.type === 'tv' ? 'TV Series' : 'Movie';
-    document.getElementById('info-title').textContent = meta.title;
-    document.getElementById('info-desc').textContent = meta.description || 'No overview available.';
-
-    // Meta chips
-    const chips = [
-        meta.year && `<span>${meta.year}</span>`,
-        meta.rating && `<span>⭑ ${meta.rating}</span>`,
-        meta.seasons && `<span>${meta.seasons} Seasons</span>`,
-    ].filter(Boolean).join('');
-    document.getElementById('info-meta').innerHTML = chips;
-
-    // Genre chips
-    document.getElementById('info-genres').innerHTML =
-        (meta.genres || []).map(g => `<span class="info-genre-chip">${g}</span>`).join('');
-
-    // Toolbar title
-    toolbarTitle.textContent = meta.title;
-    document.title = `Watch ${meta.title} — HorizonX`;
-}
-
-/* ════════════════════════════════════════════════════
-   TV — EPISODE SELECTOR
-════════════════════════════════════════════════════ */
-function buildSeasonTabs(seasons) {
-    epSeasonRow.innerHTML = '';
-    for (let s = 1; s <= seasons; s++) {
-        const tab = document.createElement('button');
-        tab.className = `season-tab${s === currentSeason ? ' active' : ''}`;
-        tab.textContent = `Season ${s}`;
-        tab.setAttribute('role', 'listitem');
-        tab.dataset.season = s;
-        tab.addEventListener('click', () => switchSeason(s));
-        epSeasonRow.appendChild(tab);
-    }
-}
-
-async function switchSeason(season) {
-    currentSeason = season;
-    // Update active tab
-    epSeasonRow.querySelectorAll('.season-tab').forEach(t =>
-        t.classList.toggle('active', parseInt(t.dataset.season) === season)
+  /* Highlight active episode card */
+  document.querySelectorAll('.ep-card').forEach(c => {
+    c.classList.toggle('active',
+      parseInt(c.dataset.season)   === season &&
+      parseInt(c.dataset.episode)  === episode
     );
-
-    // Fetch episode count for season if not cached
-    if (!episodeCounts[season]) {
-        try {
-            const res = await fetch(`${BACKEND}/api/tv/${MEDIA_ID}/season/${season}`);
-            if (res.ok) {
-                const data = await res.json();
-                episodeCounts[season] = data.episodes || 20;
-            }
-        } catch { episodeCounts[season] = 20; }
-    }
-    buildEpisodeGrid(season, episodeCounts[season]);
+  });
 }
 
-function buildEpisodeGrid(season, count) {
-    epGrid.innerHTML = '';
-    for (let e = 1; e <= count; e++) {
-        const card = document.createElement('div');
-        card.className = `ep-card${(season === currentSeason && e === currentEpisode) ? ' active' : ''}`;
-        card.setAttribute('role', 'listitem');
-        card.setAttribute('aria-label', `Episode ${e}`);
-        card.innerHTML = `<span class="ep-num">${e}</span><span class="ep-label">EP</span>`;
-        card.addEventListener('click', () => {
-            currentEpisode = e;
-            loadPlayer(currentSeason, currentEpisode);
-            closeEpPanel();
-
-            // Update active
-            epGrid.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-        });
-        epGrid.appendChild(card);
-    }
+/* ── FETCH METADATA ──────────────────────────── */
+async function fetchMeta() {
+  try {
+    const endpoint = MEDIA_TYPE === 'tv'
+      ? `/api/tv/${MEDIA_ID}`
+      : `/api/movie/${MEDIA_ID}`;
+    const res  = await fetch(endpoint);
+    const data = await res.json();
+    populateInfo(data);
+  } catch (e) {
+    console.warn('[Player] meta fetch failed', e);
+  }
 }
 
-function openEpPanel() {
-    epPanel.classList.add('open');
-    epPanel.setAttribute('aria-hidden', 'false');
-}
-function closeEpPanel() {
-    epPanel.classList.remove('open');
-    epPanel.setAttribute('aria-hidden', 'true');
-}
-
-/* ════════════════════════════════════════════════════
-   PREV / NEXT EPISODE
-════════════════════════════════════════════════════ */
-prevEpBtn?.addEventListener('click', () => {
-    if (currentEpisode > 1) {
-        currentEpisode--;
-    } else if (currentSeason > 1) {
-        currentSeason--;
-        currentEpisode = episodeCounts[currentSeason] || 1;
-    }
-    loadPlayer(currentSeason, currentEpisode);
-});
-
-nextEpBtn?.addEventListener('click', () => {
-    const maxEp = episodeCounts[currentSeason] || 999;
-    if (currentEpisode < maxEp) {
-        currentEpisode++;
-    } else if (currentSeason < totalSeasons) {
-        currentSeason++;
-        currentEpisode = 1;
-    }
-    loadPlayer(currentSeason, currentEpisode);
-});
-
-/* ════════════════════════════════════════════════════
-   WATCH PROGRESS — postMessage listener
-════════════════════════════════════════════════════ */
-let saveDebounce;
-window.addEventListener('message', (event) => {
-    let payload;
-    try { payload = JSON.parse(event.data); } catch { return; }
-    if (!payload || payload.type !== 'PLAYER_EVENT') return;
-
-    const { event: evtName, currentTime } = payload.data || {};
-
-    if (evtName === 'timeupdate' && currentTime > 5) {
-        // Debounce to save at most every 10s
-        clearTimeout(saveDebounce);
-        saveDebounce = setTimeout(() => {
-            try {
-                const existing = JSON.parse(localStorage.getItem(storageKey()) || '{}');
-                if (MEDIA_TYPE === 'tv') {
-                    existing[`s${currentSeason}e${currentEpisode}`] = Math.floor(currentTime);
-                } else {
-                    existing.time = Math.floor(currentTime);
-                }
-                localStorage.setItem(storageKey(), JSON.stringify(existing));
-                showToast();
-            } catch (_) { }
-        }, 10_000);
-    }
-
-    if (evtName === 'ended' && MEDIA_TYPE === 'tv') {
-        // Auto-advance to next episode
-        const maxEp = episodeCounts[currentSeason] || 999;
-        if (currentEpisode < maxEp) {
-            currentEpisode++;
-            loadPlayer(currentSeason, currentEpisode);
-        } else if (currentSeason < totalSeasons) {
-            currentSeason++;
-            currentEpisode = 1;
-            loadPlayer(currentSeason, currentEpisode);
-        }
-    }
-});
-
-/* ════════════════════════════════════════════════════
-   TOAST
-════════════════════════════════════════════════════ */
-let toastTimer;
-function showToast() {
-    toast.classList.add('show');
-    toast.setAttribute('aria-hidden', 'false');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => {
-        toast.classList.remove('show');
-        toast.setAttribute('aria-hidden', 'true');
-    }, 2000);
+function populateInfo(data) {
+  if (!data) return;
+  if (infoPoster) {
+    infoPoster.src = data.poster
+      ? `${TMDB_IMG}w500${data.poster}` : '';
+    infoPoster.alt = data.title || '';
+  }
+  if (infoTitle)  infoTitle.textContent = data.title || '';
+  if (infoDesc)   infoDesc.textContent  = data.overview || data.description || '';
+  if (infoMeta) {
+    const r = data.rating ? `<span class="rating">★ ${parseFloat(data.rating).toFixed(1)}</span>` : '';
+    infoMeta.innerHTML = `<span>${data.year||''}</span>${data.runtime?`<span>·</span><span>${data.runtime}</span>`:''} ${r}`;
+  }
+  if (infoGenres) {
+    infoGenres.innerHTML = (data.genres||[]).slice(0,5)
+      .map(g=>`<span class="info-genre-tag">${g.name||g}</span>`).join('');
+  }
 }
 
-/* ════════════════════════════════════════════════════
-   INFO PANEL TOGGLE
-════════════════════════════════════════════════════ */
-infoBtn?.addEventListener('click', () => {
-    const isOpen = infoPanel.classList.toggle('open');
-    infoPanel.setAttribute('aria-hidden', String(!isOpen));
-    if (isOpen) closeEpPanel();
-});
-infoClose?.addEventListener('click', () => {
-    infoPanel.classList.remove('open');
-    infoPanel.setAttribute('aria-hidden', 'true');
-});
+/* ── FETCH SEASONS ───────────────────────────── */
+async function fetchSeasons() {
+  try {
+    const res  = await fetch(`/api/tv/${MEDIA_ID}/seasons`);
+    const data = await res.json();
+    allSeasons  = data.seasons || [];
+    renderSeasonTabs();
+    await fetchEpisodes(SEASON);
+  } catch (e) {
+    console.warn('[Player] seasons fetch failed', e);
+  }
+}
 
-epBtn?.addEventListener('click', () => {
-    openEpPanel();
-    infoPanel.classList.remove('open');
-    infoPanel.setAttribute('aria-hidden', 'true');
-});
-epClose?.addEventListener('click', closeEpPanel);
+function renderSeasonTabs() {
+  seasonTabs.innerHTML = '';
+  allSeasons.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'season-tab' + (s.season_number === activeSeason ? ' active' : '');
+    btn.textContent = s.name || `Season ${s.season_number}`;
+    btn.dataset.season = s.season_number;
+    btn.addEventListener('click', async () => {
+      activeSeason = s.season_number;
+      document.querySelectorAll('.season-tab')
+        .forEach(t => t.classList.toggle('active', t === btn));
+      await fetchEpisodes(s.season_number);
+    });
+    seasonTabs.appendChild(btn);
+  });
+}
 
-/* ════════════════════════════════════════════════════
-   WATCHLIST (localStorage)
-════════════════════════════════════════════════════ */
-wishlistBtn?.addEventListener('click', () => {
-    const list = JSON.parse(localStorage.getItem('cv_watchlist') || '[]');
-    const key = `${MEDIA_TYPE}:${MEDIA_ID}`;
-    const inList = list.includes(key);
-    if (inList) {
-        const updated = list.filter(k => k !== key);
-        localStorage.setItem('cv_watchlist', JSON.stringify(updated));
-        wishlistBtn.style.color = '';
-        wishlistBtn.querySelector('svg').innerHTML =
-            '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>';
-    } else {
-        list.push(key);
-        localStorage.setItem('cv_watchlist', JSON.stringify(list));
-        wishlistBtn.style.color = 'var(--gold)';
-        wishlistBtn.querySelector('svg').innerHTML =
-            '<polyline points="20 6 9 17 4 12"/>';
+/* ── FETCH EPISODES ──────────────────────────── */
+async function fetchEpisodes(season) {
+  const key = `S${season}`;
+  if (episodeCache[key]) { renderEpisodes(episodeCache[key], season); return; }
+
+  episodeGrid.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const sk = document.createElement('div');
+    sk.className = 'ep-skeleton';
+    episodeGrid.appendChild(sk);
+  }
+
+  try {
+    const res  = await fetch(`/api/tv/${MEDIA_ID}/season/${season}`);
+    const data = await res.json();
+    episodeCache[key] = data.episodes || [];
+    renderEpisodes(episodeCache[key], season);
+  } catch (e) {
+    episodeGrid.innerHTML =
+      '<p style="color:rgba(255,255,255,0.3);padding:1rem">Could not load episodes.</p>';
+  }
+}
+
+function renderEpisodes(episodes, season) {
+  episodeGrid.innerHTML = '';
+  if (!episodes.length) {
+    episodeGrid.innerHTML = '<p style="color:rgba(255,255,255,0.3);padding:1rem">No episodes found.</p>';
+    return;
+  }
+  episodes.forEach(ep => {
+    const isActive = season === SEASON && ep.episode_number === EPISODE;
+    const thumbHTML = ep.still
+      ? `<img class="ep-thumb" src="${TMDB_IMG}w300${ep.still}"
+            loading="lazy" alt="Ep ${ep.episode_number}"
+            onerror="this.style.display='none'">`
+      : `<div class="ep-thumb-fallback">▶</div>`;
+
+    const card = document.createElement('div');
+    card.className = 'ep-card' + (isActive ? ' active' : '');
+    card.dataset.season  = season;
+    card.dataset.episode = ep.episode_number;
+    card.innerHTML = `
+      <div class="ep-thumb-wrap">
+        ${thumbHTML}
+        <div class="ep-play-overlay">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        </div>
+      </div>
+      <div class="ep-info">
+        <div class="ep-num">EP ${ep.episode_number}</div>
+        <div class="ep-name">${ep.name || `Episode ${ep.episode_number}`}</div>
+        <div class="ep-meta">${ep.runtime ? ep.runtime+'m' : ''}${ep.rating ? ' · ★'+ep.rating : ''}</div>
+      </div>
+    `;
+    card.addEventListener('click', () => {
+      closeEpisodePanel();
+      loadPlayer(season, ep.episode_number);
+    });
+    episodeGrid.appendChild(card);
+  });
+
+  const activeCard = episodeGrid.querySelector('.ep-card.active');
+  if (activeCard) setTimeout(() => activeCard.scrollIntoView({ behavior:'smooth', block:'center' }), 80);
+}
+
+/* ── PANELS ──────────────────────────────────── */
+function openEpisodePanel() {
+  closeInfoPanel();
+  episodePanel.classList.add('open');
+  panelBackdrop.classList.add('visible');
+  btnEpisodes.classList.add('active');
+}
+function closeEpisodePanel() {
+  episodePanel.classList.remove('open');
+  if (!infoPanel.classList.contains('open')) panelBackdrop.classList.remove('visible');
+  btnEpisodes.classList.remove('active');
+}
+function openInfoPanel() {
+  closeEpisodePanel();
+  infoPanel.classList.add('open');
+  panelBackdrop.classList.add('visible');
+  btnInfo.classList.add('active');
+}
+function closeInfoPanel() {
+  infoPanel.classList.remove('open');
+  if (!episodePanel.classList.contains('open')) panelBackdrop.classList.remove('visible');
+  btnInfo.classList.remove('active');
+}
+
+/* ── PREV / NEXT ─────────────────────────────── */
+async function goPrev() {
+  if (EPISODE > 1) { loadPlayer(SEASON, EPISODE - 1); return; }
+  if (SEASON  > 1) {
+    const prevS = SEASON - 1;
+    await fetchEpisodes(prevS);
+    const eps = episodeCache[`S${prevS}`] || [];
+    if (eps.length) {
+      activeSeason = prevS;
+      document.querySelectorAll('.season-tab')
+        .forEach(t => t.classList.toggle('active', parseInt(t.dataset.season) === prevS));
+      loadPlayer(prevS, eps[eps.length - 1].episode_number);
     }
+  }
+}
+async function goNext() {
+  const eps     = episodeCache[`S${SEASON}`] || [];
+  const lastEp  = eps.length ? eps[eps.length - 1].episode_number : EPISODE;
+  if (EPISODE < lastEp) { loadPlayer(SEASON, EPISODE + 1); return; }
+  const nextS   = SEASON + 1;
+  if (!allSeasons.some(s => s.season_number === nextS)) return;
+  activeSeason  = nextS;
+  document.querySelectorAll('.season-tab')
+    .forEach(t => t.classList.toggle('active', parseInt(t.dataset.season) === nextS));
+  await fetchEpisodes(nextS);
+  loadPlayer(nextS, 1);
+}
+
+/* ── EVENT LISTENERS & INIT ───────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  if (!MEDIA_ID) {
+    document.body.innerHTML =
+      '<p style="color:#fff;text-align:center;padding:5rem">No media ID provided.</p>';
+    return;
+  }
+
+  /* Hide TV-only controls for movies */
+  if (MEDIA_TYPE !== 'tv') {
+    if (btnEpisodes) btnEpisodes.style.display = 'none';
+    if (btnPrev)     btnPrev.style.display     = 'none';
+    if (btnNext)     btnNext.style.display     = 'none';
+  } else {
+    /* Restore saved progress */
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem(`hx_progress_${MEDIA_ID}`)
+      );
+      if (saved?.season && saved?.episode) {
+        SEASON  = saved.season;
+        EPISODE = saved.episode;
+      }
+    } catch (e) {}
+
+    /* Pre-fetch season data silently — do NOT open the panel */
+    fetchSeasons();
+  }
+
+  /* Start playback immediately */
+  fetchMeta();
+  loadPlayer(SEASON, EPISODE);
+
+  /* ── EPISODES button ── */
+  if (btnEpisodes) {
+    btnEpisodes.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (episodePanel.classList.contains('open')) {
+        closeEpisodePanel();
+      } else {
+        openEpisodePanel();
+      }
+    });
+  }
+
+  /* ── Episode panel X button ── */
+  if (episodePanelClose) {
+    episodePanelClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeEpisodePanel();
+    });
+  }
+
+  /* ── INFO button ── */
+  if (btnInfo) {
+    btnInfo.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (infoPanel.classList.contains('open')) {
+        closeInfoPanel();
+      } else {
+        openInfoPanel();
+      }
+    });
+  }
+
+  /* ── Info panel X button ── */
+  if (infoPanelClose) {
+    infoPanelClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeInfoPanel();
+    });
+  }
+
+  /* ── Backdrop closes both panels ── */
+  if (panelBackdrop) {
+    panelBackdrop.addEventListener('click', () => {
+      closeEpisodePanel();
+      closeInfoPanel();
+    });
+  }
+
+  /* ── PREV / NEXT ── */
+  if (btnPrev) btnPrev.addEventListener('click', goPrev);
+  if (btnNext) btnNext.addEventListener('click', goNext);
+
+  /* ── Keyboard shortcuts ── */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeEpisodePanel();
+      closeInfoPanel();
+    }
+  });
+
+  /* ── iframe postMessage (auto next episode) ── */
+  window.addEventListener('message', (e) => {
+    if (e.data?.type === 'PLAYER_EVENT' &&
+        e.data?.event === 'ended' &&
+        MEDIA_TYPE === 'tv') {
+      goNext();
+    }
+  });
 });
-
-/* ════════════════════════════════════════════════════
-   BOOT
-════════════════════════════════════════════════════ */
-(async () => {
-    if (!MEDIA_ID) {
-        loader.querySelector('.loader-text').textContent = 'No media ID provided.';
-        return;
-    }
-
-    // 1. Load the iframe immediately (don't wait for metadata)
-    loadPlayer(currentSeason, currentEpisode);
-
-    // 2. Fetch metadata async to populate panels
-    const meta = await fetchMeta();
-    populateInfoPanel(meta);
-
-    // 3. TV-specific setup
-    if (MEDIA_TYPE === 'tv') {
-        epBtn.style.display = 'inline-flex';
-        toolbarCenterTV.setAttribute('aria-hidden', 'false');
-        toolbarSub.textContent = `Season ${currentSeason} · Episode ${currentEpisode}`;
-
-        totalSeasons = meta?.seasons || 1;
-        episodeCounts[currentSeason] = meta?.episodes || 24;
-
-        buildSeasonTabs(totalSeasons);
-        buildEpisodeGrid(currentSeason, episodeCounts[currentSeason]);
-
-        // Add backend route for season details if available
-        toolbarSub.textContent = 'TV Series';
-    } else {
-        toolbarSub.textContent = meta?.year ? `${meta.year} · HorizonX` : 'HorizonX';
-    }
-
-    // 4. Check watchlist state
-    const list = JSON.parse(localStorage.getItem('cv_watchlist') || '[]');
-    if (list.includes(`${MEDIA_TYPE}:${MEDIA_ID}`)) {
-        wishlistBtn.style.color = 'var(--gold)';
-    }
-})();

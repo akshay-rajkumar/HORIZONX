@@ -281,10 +281,20 @@ function setHeroSlide(index, type) {
 
   // Attach Play/Trailer actions
   heroPlay.onclick = () => window.location.href = `player.html?type=${item.type || type}&id=${item.id}`;
-  heroTrailer.onclick = () => {
-    // Basic trailer implementation
-    alert('Trailer functionality requires fetching videos endpoint. Redirecting to player...');
-    heroPlay.click();
+  heroTrailer.onclick = async () => {
+    const ep = item.type || type;
+    try {
+      const res = await fetch(`/api/${ep}/${item.id}/trailer`);
+      const data = await res.json();
+      if (data.key) {
+        openTrailerModal(data.key);
+      } else {
+        alert('No trailer found.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error loading trailer.');
+    }
   };
 }
 
@@ -369,9 +379,38 @@ function capitalize(s) {
 
 /* ── MODALS ───────────────────────────────────────────── */
 function setupModals() {
-  modalClose.addEventListener('click', () => modalOverlay.classList.remove('active'));
+  modalClose.addEventListener('click', () => {
+    modalOverlay.classList.remove('active');
+    modalOverlay.style.display = 'none';
+    document.body.style.overflow = '';
+  });
   modalOverlay.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+    if (e.target === modalOverlay) {
+      modalOverlay.classList.remove('active');
+      modalOverlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  });
+
+  const trailerModalClose = document.getElementById('trailerModalClose');
+  if (trailerModalClose) {
+    trailerModalClose.addEventListener('click', closeTrailerModal);
+  }
+
+  const trailerModal = document.getElementById('trailerModal');
+  if (trailerModal) {
+    trailerModal.addEventListener('click', function(e) {
+      if (e.target === this) closeTrailerModal();
+    });
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeTrailerModal();
+      modalOverlay.classList.remove('active');
+      modalOverlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }
   });
 }
 
@@ -390,7 +429,43 @@ function openModal(item, type) {
   modalGenres.innerHTML = (item.genres || []).map(g => `<span>${g}</span>`).join('');
   
   modalPlay.onclick = () => window.location.href = `player.html?type=${item.type || type}&id=${item.id}`;
+  modalTrailer.onclick = async () => {
+    const ep = item.type || type;
+    try {
+      const res = await fetch(`/api/${ep}/${item.id}/trailer`);
+      const data = await res.json();
+      if (data.key) {
+        openTrailerModal(data.key);
+      } else {
+        alert('No trailer found.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error loading trailer.');
+    }
+  };
+
+  modalOverlay.style.display = 'flex';
   modalOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function openTrailerModal(key) {
+  const modal  = document.getElementById('trailerModal');
+  const frame  = document.getElementById('trailerFrame');
+  if (!modal || !frame || !key) return;
+  frame.src = `https://www.youtube.com/embed/${key}?autoplay=1&rel=0`;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTrailerModal() {
+  const modal = document.getElementById('trailerModal');
+  const frame = document.getElementById('trailerFrame');
+  if (!modal || !frame) return;
+  frame.src = '';
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 /* ── SEARCH ───────────────────────────────────────────── */
