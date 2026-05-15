@@ -287,7 +287,7 @@ function setHeroSlide(index, type) {
       const res = await fetch(`/api/${ep}/${item.id}/trailer`);
       const data = await res.json();
       if (data.key) {
-        openTrailerModal(data.key);
+        openTrailerModal(data.key, item.title || '', item.backdropUrl || null);
       } else {
         alert('No trailer found.');
       }
@@ -392,17 +392,13 @@ function setupModals() {
     }
   });
 
-  const trailerModalClose = document.getElementById('trailerModalClose');
-  if (trailerModalClose) {
-    trailerModalClose.addEventListener('click', closeTrailerModal);
-  }
+  document.getElementById('trailerModalClose')
+    .addEventListener('click', closeTrailerModal);
 
-  const trailerModal = document.getElementById('trailerModal');
-  if (trailerModal) {
-    trailerModal.addEventListener('click', function(e) {
+  document.getElementById('trailerModal')
+    .addEventListener('click', function(e) {
       if (e.target === this) closeTrailerModal();
     });
-  }
 
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
@@ -435,7 +431,7 @@ function openModal(item, type) {
       const res = await fetch(`/api/${ep}/${item.id}/trailer`);
       const data = await res.json();
       if (data.key) {
-        openTrailerModal(data.key);
+        openTrailerModal(data.key, item.title || '', item.backdropUrl || null);
       } else {
         alert('No trailer found.');
       }
@@ -450,21 +446,45 @@ function openModal(item, type) {
   document.body.style.overflow = 'hidden';
 }
 
-function openTrailerModal(key) {
-  const modal  = document.getElementById('trailerModal');
-  const frame  = document.getElementById('trailerFrame');
-  if (!modal || !frame || !key) return;
-  frame.src = `https://www.youtube.com/embed/${key}?autoplay=1&rel=0`;
-  modal.style.display = 'flex';
+function openTrailerModal(key, title, posterUrl) {
+  if (!key) return;
+
+  const modal    = document.getElementById('trailerModal');
+  const ytLink   = document.getElementById('trailerYTLink');
+  const playRing = document.getElementById('trailerPlayRing');
+  const titleEl  = document.getElementById('trailerMovieTitle');
+  const posterBg = document.getElementById('trailerPosterBg');
+
+  if (!modal) return;
+
+  /* Set YouTube link */
+  const ytURL = `https://www.youtube.com/watch?v=${key}`;
+  if (ytLink) ytLink.href = ytURL;
+
+  /* Set movie title */
+  if (titleEl) titleEl.textContent = title || '';
+
+  /* Set backdrop poster */
+  if (posterBg && posterUrl) {
+    posterBg.style.backgroundImage = `url(${posterUrl})`;
+  }
+
+  /* Play ring also opens YouTube */
+  if (playRing) {
+    playRing.onclick = () => {
+      window.open(ytURL, '_blank', 'noopener');
+    };
+  }
+
+  /* Show modal */
+  modal.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeTrailerModal() {
   const modal = document.getElementById('trailerModal');
-  const frame = document.getElementById('trailerFrame');
-  if (!modal || !frame) return;
-  frame.src = '';
-  modal.style.display = 'none';
+  if (!modal) return;
+  modal.classList.remove('open');
   document.body.style.overflow = '';
 }
 
