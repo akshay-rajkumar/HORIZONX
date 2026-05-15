@@ -9,6 +9,7 @@ const navLinks       = document.querySelectorAll('.nav-item');
 const homeView       = document.getElementById('homeView');
 const categoryView   = document.getElementById('categoryView');
 const mainContent    = document.getElementById('mainContent');
+const navbar         = document.getElementById('navbar');
 
 // Search
 const searchToggle   = document.getElementById('searchToggle');
@@ -52,6 +53,41 @@ const modalDesc      = document.getElementById('modalDesc');
 const modalPlay      = document.getElementById('modalPlay');
 const modalTrailer   = document.getElementById('modalTrailer');
 
+/* ── API CACHE ────────────────────────────────────────── */
+const API_CACHE = new Map();
+
+async function cachedFetch(url) {
+  if (API_CACHE.has(url)) return API_CACHE.get(url);
+  const res  = await fetch(url);
+  if (!res.ok) throw new Error(`${res.status} ${url}`);
+  const data = await res.json();
+  API_CACHE.set(url, data);
+  return data;
+}
+
+/* ── LAZY LOADING ─────────────────────────────────────── */
+const PLACEHOLDER_SRC = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+function lazyLoadImages() {
+  if (!('IntersectionObserver' in window)) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+        }
+        observer.unobserve(img);
+      }
+    });
+  }, { rootMargin: '200px' });
+
+  document.querySelectorAll('img[data-src]').forEach(img => {
+    observer.observe(img);
+  });
+}
+
 /* ── STATE ────────────────────────────────────────────── */
 let currentSection = 'home'; // 'home', 'movies', 'tvshows', 'anime', 'kdrama'
 let categoryFilter = 'latest'; // 'latest', 'top-rated'
@@ -62,6 +98,7 @@ let isFetchingCategory = false;
 let heroItems = [];
 let currentHeroIndex = 0;
 let heroInterval;
+let heroType = 'movie';
 
 /* ── DATA MAPPING ─────────────────────────────────────── */
 const SECTION_META = {
@@ -84,10 +121,27 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSearch();
   setupSliders();
   setupModals();
+  setupScrollHandler();
   
   // Load initial HOME data
   loadHomeData();
 });
+
+/* ── SCROLL HANDLER (throttled with rAF) ──────────────── */
+function setupScrollHandler() {
+  let scrollTicking = false;
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking) {
+      requestAnimationFrame(() => {
+        if (navbar) {
+          navbar.classList.toggle('scrolled', window.scrollY > 40);
+        }
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }, { passive: true });
+}
 
 /* ── NAVIGATION & VIEWS ───────────────────────────────── */
 function setupNavigation() {
@@ -168,8 +222,7 @@ function switchSection(section) {
 /* ── API HELPERS ──────────────────────────────────────── */
 async function fetchApi(url) {
   try {
-    const res = await fetch(url);
-    const data = await res.json();
+    const data = await cachedFetch(url);
     // Handle both { results: [...] } and plain array responses
     let items = [];
     if (Array.isArray(data)) items = data;
@@ -231,11 +284,13 @@ async function loadRowGroup(section, filter) {
   items.forEach(item => {
     track.appendChild(createSliderCard(item, SECTION_META[section].type));
   });
+  lazyLoadImages();
 }
 
 /* ── HERO CAROUSEL ────────────────────────────────────── */
 function initHero(items, type) {
   heroItems = items;
+  heroType = type;
   currentHeroIndex = 0;
   clearInterval(heroInterval);
   
@@ -251,9 +306,21 @@ function initHero(items, type) {
 
   heroInterval = setInterval(() => {
     currentHeroIndex = (currentHeroIndex + 1) % heroItems.length;
-    setHeroSlide(currentHeroIndex, type);
+    setHeroSlide(currentHeroIndex, heroType);
   }, 7000);
 }
+
+/* Pause hero carousel when tab is hidden */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(heroInterval);
+  } else {
+    heroInterval = setInterval(() => {
+      currentHeroIndex = (currentHeroIndex + 1) % heroItems.length;
+      setHeroSlide(currentHeroIndex, heroType);
+    }, 7000);
+  }
+});
 
 function setHeroSlide(index, type) {
   currentHeroIndex = index;
@@ -332,6 +399,7 @@ async function loadCategoryGrid(reset = false) {
   isFetchingCategory = false;
 
   if (items.length === 0) loadMoreBar.style.display = 'none';
+  lazyLoadImages();
 }
 
 /* ── UI COMPONENTS ────────────────────────────────────── */
@@ -341,7 +409,7 @@ function createSliderCard(item, type) {
   const imgUrl = item.backdropUrl || item.posterUrl || '';
   
   div.innerHTML = `
-    <img src="${imgUrl}" class="card-img" alt="${item.title}" loading="lazy"/>
+    <img data-src="${imgUrl}" src="${PLACEHOLDER_SRC}" class="card-img" alt="${item.title}" style="background:rgba(255,255,255,0.04)"/>
     <div class="card-overlay">
       <h3 class="card-title">${item.title}</h3>
       <div class="card-meta">
@@ -360,7 +428,7 @@ function createPosterCard(item, type) {
   const imgUrl = item.posterUrl || item.backdropUrl || '';
   
   div.innerHTML = `
-    <img src="${imgUrl}" class="card-img" alt="${item.title}" loading="lazy"/>
+    <img data-src="${imgUrl}" src="${PLACEHOLDER_SRC}" class="card-img" alt="${item.title}" style="background:rgba(255,255,255,0.04)"/>
     <div class="poster-overlay">
       <div class="poster-play-btn">▶</div>
     </div>
@@ -508,10 +576,12 @@ function setupSearch() {
     if (e.key === 'Escape') searchOverlay.classList.remove('active');
   });
 
-  let debounceTimer;
-  searchInput.addEventListener('input', (e) => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => performSearch(e.target.value), 500);
+  let searchDebounceTimer = null;
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim();
+    clearTimeout(searchDebounceTimer);
+    if (q.length < 2) { searchResults.innerHTML = ''; return; }
+    searchDebounceTimer = setTimeout(() => performSearch(q), 400);
   });
 }
 
@@ -537,4 +607,5 @@ async function performSearch(query) {
     const el = createPosterCard(item, item.type || 'movie');
     searchResults.appendChild(el);
   });
+  lazyLoadImages();
 }

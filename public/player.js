@@ -16,7 +16,7 @@ const btnPrev           = document.getElementById('btnPrev');
 const btnNext           = document.getElementById('btnNext');
 const episodePanel      = document.getElementById('episodePanel');
 const episodePanelClose = document.getElementById('episodePanelClose');
-const seasonTabs        = document.getElementById('seasonTabs');
+let   seasonTabs        = document.getElementById('seasonTabs');
 const episodeGrid       = document.getElementById('episodeGrid');
 const infoPanel         = document.getElementById('infoPanel');
 const infoPanelClose    = document.getElementById('infoPanelClose');
@@ -32,6 +32,7 @@ let allSeasons   = [];
 let episodeCache = {};
 let activeSeason = SEASON;
 const TMDB_IMG   = 'https://image.tmdb.org/t/p/';
+let   spinnerFallback = null;
 
 /* ── BUILD EMBED URL ─────────────────────────── */
 function buildEmbedURL(season, episode) {
@@ -54,17 +55,20 @@ function loadPlayer(season, episode) {
   /* Show spinner */
   loadingSpinner.classList.remove('done');
 
+  clearTimeout(spinnerFallback);    /* clear previous fallback */
+
   /* Set iframe src */
   const embedURL = buildEmbedURL(season, episode);
   playerFrame.setAttribute('src', embedURL);
 
   /* Hide spinner after load */
   playerFrame.onload = () => {
+    clearTimeout(spinnerFallback);  /* clear on natural load */
     setTimeout(() => loadingSpinner.classList.add('done'), 500);
   };
 
   /* Fallback: hide spinner after 8 seconds regardless */
-  setTimeout(() => loadingSpinner.classList.add('done'), 8000);
+  spinnerFallback = setTimeout(() => loadingSpinner.classList.add('done'), 8000);
 
   /* Save progress */
   if (MEDIA_TYPE === 'tv') {
@@ -132,7 +136,12 @@ async function fetchSeasons() {
 }
 
 function renderSeasonTabs() {
-  seasonTabs.innerHTML = '';
+  /* Clone to remove all old listeners */
+  const fresh = seasonTabs.cloneNode(false);
+  seasonTabs.parentNode.replaceChild(fresh, seasonTabs);
+  seasonTabs = fresh;
+
+  fresh.innerHTML = '';
   allSeasons.forEach(s => {
     const btn = document.createElement('button');
     btn.className = 'season-tab' + (s.season_number === activeSeason ? ' active' : '');
@@ -140,11 +149,11 @@ function renderSeasonTabs() {
     btn.dataset.season = s.season_number;
     btn.addEventListener('click', async () => {
       activeSeason = s.season_number;
-      document.querySelectorAll('.season-tab')
+      fresh.querySelectorAll('.season-tab')
         .forEach(t => t.classList.toggle('active', t === btn));
       await fetchEpisodes(s.season_number);
     });
-    seasonTabs.appendChild(btn);
+    fresh.appendChild(btn);
   });
 }
 
@@ -208,6 +217,25 @@ function renderEpisodes(episodes, season) {
       closeEpisodePanel();
       loadPlayer(season, ep.episode_number);
     });
+
+    /* Prefetch next season when hovering last episode */
+    card.addEventListener('mouseenter', () => {
+      const epNum     = parseInt(card.dataset.episode);
+      const seasonNum = parseInt(card.dataset.season);
+      const eps       = episodeCache[`S${seasonNum}`] || [];
+      const isLast    = epNum === (eps[eps.length - 1]?.episode_number);
+      if (isLast) {
+        const nextS   = seasonNum + 1;
+        const hasNext = allSeasons.some(s => s.season_number === nextS);
+        if (hasNext && !episodeCache[`S${nextS}`]) {
+          fetch(`/api/tv/${MEDIA_ID}/season/${nextS}`)
+            .then(r => r.json())
+            .then(d => { episodeCache[`S${nextS}`] = d.episodes || []; })
+            .catch(() => {});
+        }
+      }
+    });
+
     episodeGrid.appendChild(card);
   });
 
