@@ -482,3 +482,144 @@ html, body {
   .episode-panel { height: 80vh; }
   .toolbar-btn { min-height: 36px; }
 }
+
+/* ── UBLOCK BANNER ───────────────────────────── */
+
+.ad-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1.25rem;
+  background: linear-gradient(
+    90deg,
+    rgba(20, 20, 20, 0.98) 0%,
+    rgba(30, 10, 10, 0.98) 100%
+  );
+  border-bottom: 1px solid rgba(224, 16, 42, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  max-height: 60px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+}
+
+.ad-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65);
+  flex: 1;
+  min-width: 0;
+}
+
+.ad-banner-left svg {
+  flex-shrink: 0;
+  color: #E0102A;
+}
+
+.ad-banner-left strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.ad-banner-link {
+  color: #E0102A;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.ad-banner-link:hover { color: #ff3352; }
+
+.ad-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.ad-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.9rem;
+  background: #E0102A;
+  border-radius: 5px;
+  color: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.ad-banner-btn:hover {
+  background: #ff1a35;
+  transform: translateY(-1px);
+}
+
+.ad-banner-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.ad-banner-close:hover {
+  background: rgba(255, 255, 255, 0.13);
+  color: #fff;
+}
+
+/* Push the top-bar down when banner is visible */
+.top-bar {
+  top: 44px !important; /* banner height */
+  transition: top 0.4s ease;
+}
+
+/* Push the player area down too */
+.player-area {
+  top: calc(var(--top-h) + 44px) !important;
+  transition: top 0.4s ease;
+}
+
+/* When banner is dismissed, restore positions */
+.banner-gone .top-bar  { top: 0 !important; }
+.banner-gone .player-area {
+  top: var(--top-h) !important;
+}
+
+/* ── MOBILE ───────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .ad-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    max-height: 90px;
+  }
+
+  .ad-banner-left { font-size: 0.76rem; }
+
+  .ad-banner-right { width: 100%; justify-content: flex-end; }
+
+  .top-bar    { top: 78px !important; }
+  .player-area { top: calc(var(--top-h) + 78px) !important; }
+}

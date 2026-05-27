@@ -11,6 +11,41 @@
 </head>
 <body>
 
+  <!-- UBLOCK BANNER -->
+  <div id="adBanner" class="ad-banner">
+    <div class="ad-banner-left">
+      <svg width="18" height="18" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <span>
+        For an <strong>ad-free experience</strong>, install
+        <a
+          href="https://ublockorigin.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ad-banner-link"
+        >uBlock Origin</a>
+        — it's free.
+      </span>
+    </div>
+    <div class="ad-banner-right">
+      <a
+        href="https://ublockorigin.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="ad-banner-btn"
+      >
+        Install Free
+      </a>
+      <button class="ad-banner-close" id="adBannerClose"
+        aria-label="Dismiss">
+        ✕
+      </button>
+    </div>
+  </div>
+
   <!-- TOP BAR -->
   <div class="top-bar">
     <button class="back-btn" onclick="window.location.href='/'">
@@ -42,8 +77,9 @@
       allowfullscreen="true"
       webkitallowfullscreen="true"
       mozallowfullscreen="true"
-      allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share"
+      allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
       referrerpolicy="no-referrer"
+      style="position:absolute;inset:0;width:100%;height:100%;border:none;background:#000;"
     ></iframe>
 
     <!-- Info panel (slides in from right) -->
@@ -89,5 +125,31 @@
   </div>
 
   <script src="player.js"></script>
+  <script>
+    (function() {
+      /* Don't show banner if user already dismissed it */
+      if (localStorage.getItem('hx_ubanner_dismissed') === '1') {
+        var b = document.getElementById('adBanner');
+        if (b) b.style.display = 'none';
+        document.body.classList.add('banner-gone');
+        return;
+      }
+      var closeBtn = document.getElementById('adBannerClose');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+          var banner = document.getElementById('adBanner');
+          if (banner) {
+            banner.style.maxHeight = '0';
+            banner.style.opacity   = '0';
+            setTimeout(function() {
+              banner.style.display = 'none';
+              document.body.classList.add('banner-gone');
+            }, 400);
+          }
+          localStorage.setItem('hx_ubanner_dismissed', '1');
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

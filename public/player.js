@@ -1,3 +1,117 @@
+/* ═══════════════════════════════════════════════
+   HorizonX — Popup Blocker v3
+   Strategy: catch window blur (fires when any popup
+   opens), immediately close the popup window handle,
+   and restore focus to the parent page.
+═══════════════════════════════════════════════ */
+(function initPopupBlocker() {
+
+  /* Stores the last popup window handle we opened so
+     we can close it. We intercept window.open in the
+     PARENT context to catch same-origin popup attempts. */
+  let lastPopup    = null;
+  let blurTimer    = null;
+  let focused      = true;
+
+  /* ── Intercept parent-context window.open ──────
+     This catches popups triggered by parent-page code.
+     It cannot catch iframe-context window.open calls,
+     but the blur strategy below handles those.        */
+  const _nativeOpen = window.open;
+  window.open = function(url, name, specs) {
+    try {
+      const u = new URL(url || '', location.href);
+      /* Allow YouTube for trailer button */
+      if (u.hostname.endsWith('youtube.com') ||
+          u.hostname.endsWith('youtube-nocookie.com')) {
+        return _nativeOpen.call(window, url, name, specs);
+      }
+    } catch (_) {}
+    /* Open as tiny hidden window then immediately close */
+    try {
+      const w = _nativeOpen.call(
+        window, 'about:blank', '_blank',
+        'width=1,height=1,left=-9999,top=-9999'
+      );
+      if (w) { w.close(); }
+    } catch (_) {}
+    return null;
+  };
+
+  /* ── Blur-based popup catcher ──────────────────
+     When the iframe opens a popup (window.open in the
+     iframe context), the PARENT window loses focus.
+     We detect this and immediately close the popup.  */
+
+  function onFocus() {
+    focused = true;
+    clearTimeout(blurTimer);
+  }
+
+  function onBlur() {
+    focused = false;
+    blurTimer = setTimeout(() => {
+      if (!focused) {
+        /* A popup has stolen focus. Attempt to close it
+           by opening a reference to it then closing it. */
+        try {
+          /* Re-focus the parent window immediately */
+          window.focus();
+          document.body.focus();
+        } catch (_) {}
+
+        /* If the browser allows, close the popup.
+           Most modern browsers give us a brief window
+           to close popups that were just opened.      */
+        try {
+          const popup = window.open(
+            'about:blank', '_popup_kill',
+            'width=1,height=1,left=-9999,top=-9999'
+          );
+          if (popup) popup.close();
+        } catch (_) {}
+      }
+    }, 80); /* 80ms — fast enough to close before ad loads */
+  }
+
+  window.addEventListener('focus', onFocus);
+  window.addEventListener('blur',  onBlur);
+
+  /* Also catch via document visibilitychange */
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      window.focus();
+    }
+  });
+
+  /* ── Pointer-events trick ──────────────────────
+     The iframe fires window.open on mousedown, not
+     on click. We intercept mousedown on the player
+     area to trigger our focus-lock BEFORE the iframe
+     gets the event.                                 */
+  document.addEventListener('DOMContentLoaded', () => {
+    const area = document.querySelector('.player-area');
+    if (!area) return;
+
+    area.addEventListener('mousedown', () => {
+      /* Reset blur detection on every intentional click */
+      focused = true;
+      clearTimeout(blurTimer);
+
+      /* Schedule a focus check — if we lost focus within
+         500ms of this mousedown, it was an ad popup     */
+      blurTimer = setTimeout(() => {
+        if (!focused) {
+          window.focus();
+          document.body.focus();
+        }
+      }, 500);
+    }, true); /* capture phase */
+
+  });
+
+})();
+
 'use strict';
 
 /* ── URL PARAMS ──────────────────────────────── */
@@ -299,6 +413,8 @@ async function goNext() {
   await fetchEpisodes(nextS);
   loadPlayer(nextS, 1);
 }
+
+
 
 /* ── EVENT LISTENERS & INIT ───────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
